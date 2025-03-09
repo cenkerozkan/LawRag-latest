@@ -18,3 +18,7 @@
 - **Backend**: FastAPI, Python
 - **Database**: MongoDB (for message history)
 - **Storage**: Local File System
+
+# 📝 To Do
+- [x] Implement pdf selector using semantic similarity with user input
+- [ ] Implement document retrieval using semantic similarity

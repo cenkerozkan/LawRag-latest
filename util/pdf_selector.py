@@ -101,6 +101,6 @@ class PdfSelector(metaclass=Singleton):
     async def aselect(
             self,
             question: dict[str, str]
-    ) -> dict:
+    ) -> list[dict[str, str]]:
         result: list[dict] = await self._example_selector.aselect_examples(question)
         return result

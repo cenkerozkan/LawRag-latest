@@ -22,4 +22,5 @@
 # 📝 To Do
 - [x] Implement pdf selector using semantic similarity with user input
 - [x] Implement Document repositories for MongoDB and PostgreSQL
+- [ ] Implement message history storage in MongoDB
 - [ ] Implement rag service logic

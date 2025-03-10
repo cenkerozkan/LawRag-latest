@@ -24,6 +24,8 @@
 - [x] Implement Document repositories for MongoDB and PostgreSQL
 - [x] Implement MongoDB connector
 - [x] Implement message history storage in MongoDB
-- [ ] Add new fields into message history part in MongoDB Model
 - [x] Increase k in semantic pdf simulator for multiple rag.
+- [ ] Add new fields into message history part in MongoDB Model
+- [ ] Bring xml based instruction prompts
 - [ ] Implement rag service logic
+- [ ] Bring streamlit UI ||  FastAPI UI

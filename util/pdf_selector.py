@@ -92,7 +92,8 @@ class PdfSelector(metaclass=Singleton):
         ]
         self._example_selector = SemanticSimilarityExampleSelector.from_examples(
             self._examples,
-            GoogleGenerativeAIEmbeddings(model="models/text-embedding-004", google_api_key=os.getenv("GEMINI_API_KEY")),
+            GoogleGenerativeAIEmbeddings(model="models/text-embedding-004",
+                                         google_api_key=os.getenv("GEMINI_API_KEY")),
             Chroma,
             k=1
         )

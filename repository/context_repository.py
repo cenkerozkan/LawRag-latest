@@ -11,6 +11,61 @@ class ContextRepository(MongoDBRepositoryBase):
         self._db = MongoDBConnector().client["context"]
         self._collection = self._db["chat_history"]
 
+    # Ensure database setup
+    async def _ensure_db_setup(self):
+        try:
+            # List all databases
+            db_list = await self._db.client.list_database_names()
+
+            # Check if our database exists
+            if "context" not in db_list:
+                # Create database by inserting a dummy document and then deleting it
+                await self._db.command({
+                    "create": "chat_history",
+                    "validator": {
+                        "$jsonSchema": {
+                            "bsonType": "object",
+                            "required": ["chat_id", "created_at", "updated_at", "history"],
+                            "properties": {
+                                "chat_id": {"bsonType": "string"},
+                                "created_at": {"bsonType": "string"},
+                                "updated_at": {"bsonType": "string"},
+                                "history": {"bsonType": "array"}
+                            }
+                        }
+                    }
+                })
+                self._logger.info("Created context database")
+
+            # Check if collection exists
+            collections = await self._db.list_collection_names()
+            if "chat_history" not in collections:
+                await self._db.create_collection(
+                    "chat_history",
+                    validator={
+                        "$jsonSchema": {
+                            "bsonType": "object",
+                            "required": ["chat_id", "created_at", "updated_at", "history"],
+                            "properties": {
+                                "chat_id": {"bsonType": "string"},
+                                "created_at": {"bsonType": "string"},
+                                "updated_at": {"bsonType": "string"},
+                                "history": {"bsonType": "array"}
+                            }
+                        }
+                    }
+                )
+                self._logger.info("Created chat_history collection")
+
+            # Create index after ensuring collection exists
+            await self._collection.create_index("chat_id", unique=True)
+            self._logger.info("Created index on chat_id")
+
+            self._logger.info("Database setup completed successfully")
+        except Exception as e:
+            self._logger.error(f"Database setup error: {e}")
+            raise Exception(f"Failed to setup database: {e}")
+
     async def insert_one(
             self,
             document: ChatThreadModel

@@ -7,8 +7,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 class MongoDbDocumentRepository:
-    _instance = None
-
     def __init__(
             self,
             file_path: str

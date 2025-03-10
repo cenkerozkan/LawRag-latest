@@ -24,4 +24,5 @@
 - [x] Implement Document repositories for MongoDB and PostgreSQL
 - [ ] Implement MongoDB connector
 - [ ] Implement message history storage in MongoDB
+- [x] Increase k in semantic pdf simulator for multiple rag.
 - [ ] Implement rag service logic

@@ -95,7 +95,7 @@ class PdfSelector(metaclass=Singleton):
             GoogleGenerativeAIEmbeddings(model="models/text-embedding-004",
                                          google_api_key=os.getenv("GEMINI_API_KEY")),
             Chroma,
-            k=1
+            k=2
         )
 
     async def aselect(
@@ -103,4 +103,4 @@ class PdfSelector(metaclass=Singleton):
             question: dict[str, str]
     ) -> dict:
         result: list[dict] = await self._example_selector.aselect_examples(question)
-        return result[0]
+        return result

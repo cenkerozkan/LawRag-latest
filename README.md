@@ -22,7 +22,8 @@
 # 📝 To Do
 - [x] Implement pdf selector using semantic similarity with user input
 - [x] Implement Document repositories for MongoDB and PostgreSQL
-- [ ] Implement MongoDB connector
-- [ ] Implement message history storage in MongoDB
+- [x] Implement MongoDB connector
+- [x] Implement message history storage in MongoDB
+- [ ] Add new fields into message history part in MongoDB Model
 - [x] Increase k in semantic pdf simulator for multiple rag.
 - [ ] Implement rag service logic

@@ -1,9 +1,10 @@
 from pydantic import BaseModel
 
-from .history_model import HistoryModel
+from .message_model import MessageModel
 
 class ChatThreadModel(BaseModel):
+    chat_name: str
     chat_id: str
     created_at: str
     updated_at: str
-    history: list[HistoryModel]
+    history: list[MessageModel]

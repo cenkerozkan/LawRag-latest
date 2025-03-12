@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class HistoryModel(BaseModel):
+class MessageModel(BaseModel):
     created_at: str
     role: str
     content: str

@@ -29,3 +29,5 @@
 - [ ] Bring xml based instruction prompts
 - [ ] Implement rag service logic
 - [ ] Bring streamlit UI ||  FastAPI UI
+- [ ] Bring a more flexible solution in rag_service _pdf_selector.
+- [ ] Bring streaming if streamlit supports it.

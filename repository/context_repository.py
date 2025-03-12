@@ -27,6 +27,7 @@ class ContextRepository(MongoDBRepositoryBase):
                             "bsonType": "object",
                             "required": ["chat_id", "created_at", "updated_at", "history"],
                             "properties": {
+                                "chat_name": {"bsonType": "string"},
                                 "chat_id": {"bsonType": "string"},
                                 "created_at": {"bsonType": "string"},
                                 "updated_at": {"bsonType": "string"},
@@ -47,6 +48,7 @@ class ContextRepository(MongoDBRepositoryBase):
                             "bsonType": "object",
                             "required": ["chat_id", "created_at", "updated_at", "history"],
                             "properties": {
+                                "chat_name": {"bsonType": "string"},
                                 "chat_id": {"bsonType": "string"},
                                 "created_at": {"bsonType": "string"},
                                 "updated_at": {"bsonType": "string"},
@@ -70,6 +72,7 @@ class ContextRepository(MongoDBRepositoryBase):
             self,
             document: ChatThreadModel
     ) -> bool:
+        self._logger.info(f"Inserting document: {document}")
         try:
             await self._collection.insert_one(document.model_dump())
 
@@ -82,6 +85,7 @@ class ContextRepository(MongoDBRepositoryBase):
             self,
             documents: list[ChatThreadModel]
     ) -> bool:
+        self._logger.info(f"Inserting documents: {documents}")
         try:
             await self._collection.insert_many([doc.model_dump() for doc in documents])
 
@@ -95,8 +99,23 @@ class ContextRepository(MongoDBRepositoryBase):
             id: str
     ) -> ChatThreadModel | None:
         result: any
+        self._logger.info(f"Retrieving document with id: {id}")
         try:
             result = await self._collection.find_one({"chat_id": id})
+
+        except Exception as e:
+            self._logger.error(e)
+            raise Exception(e)
+        return ChatThreadModel(**result) if result else None
+
+    async def get_one_by_name(
+            self,
+            name: str
+    ) -> ChatThreadModel | None:
+        result: any
+        self._logger.info(f"Retrieving document with name: {name}")
+        try:
+            result = await self._collection.find_one({"chat_name": name})
 
         except Exception as e:
             self._logger.error(e)
@@ -118,13 +137,20 @@ class ContextRepository(MongoDBRepositoryBase):
             self,
             chat_history: ChatThreadModel
     ) -> bool:
-        pass
+        result: bool = False
+        try:
+            await self._collection.update_one({"chat_id": chat_history.chat_id}, {"$set": chat_history.model_dump()})
+            result = True
+        except Exception as e:
+            self._logger.error(e)
+            raise Exception(e)
+        return result
 
     async def update_many(
             self,
             chat_history: ChatThreadModel
     ) -> bool:
-        pass
+        return False
 
     async def delete_one_by_id(
             self,

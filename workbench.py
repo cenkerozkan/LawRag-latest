@@ -8,19 +8,18 @@ load_dotenv()
 PDF SELECTOR TEST
 """
 from util.pdf_selector import PdfSelector
-# TEST FOR PDF SELECTOR
 #obj = PdfSelector()
 #while True:
     #result = asyncio.run(obj.aselect({"input": input("Enter your question: ")}))
     #print(result)
 
 """
-RAG SERVICE TEST
+RAG REPOSITORY TEST
 """
 from service.rag_service import RagService
 
-#from repository.mongodb_document_repository import MongoDbDocumentRepository
-#from repository.postgresql_document_repository import PostgreSQLDocumentRepository
+from repository.mongodb_document_repository import MongoDbDocumentRepository
+from repository.postgresql_document_repository import PostgreSQLDocumentRepository
 
 #obj = MongoDbDocumentRepository(file_path="./pdf/MongoDB_Cheat_Sheet.pdf")
 #obj_2 = PostgreSQLDocumentRepository(file_path="./pdf/PostgreSQL_Cheat_Sheet.pdf")
@@ -28,7 +27,8 @@ from service.rag_service import RagService
 
 #print(obj.retrieve("What is MongoDB?"))
 #while True:
-    #print(obj_2.retrieve(input("Enter your question: ")))
+    #result = obj.retrieve(input("Enter your question: "))
+    #print(type(result))
 
 """
 CONTEXT REPOSITORY TEST
@@ -76,4 +76,23 @@ CONTEXT REPOSITORY TEST
 RAG SERVICE TEST
 """
 from service.rag_service import RagService
+import datetime
+import uuid
+from db.model.chat_thread_model import ChatThreadModel
+from repository.context_repository import ContextRepository
+
+context_repository = ContextRepository()
+new_chat = ChatThreadModel(
+    chat_id=str(uuid.uuid4()),
+    chat_name="Test",
+    created_at=datetime.datetime.now().isoformat(),
+    updated_at=datetime.datetime.now().isoformat(),
+    history=[]
+)
+asyncio.run(context_repository.insert_one(new_chat))
+
 obj = RagService()
+while True:
+    result = asyncio.run(obj.send_message(query=input("Enter your question: "),
+                              chat_thread=new_chat))
+    print(result)

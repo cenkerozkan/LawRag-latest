@@ -2,6 +2,7 @@ import os
 
 from langchain_chroma import Chroma
 from langchain_core.example_selectors import SemanticSimilarityExampleSelector
+from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 
@@ -92,6 +93,13 @@ class PdfSelector(metaclass=Singleton):
             {"input": "How do you use DELETE ... RETURNING to remove and return a row?", "output": "postgresql"},
             {"input": "How can you safely delete all rows while preserving the table structure?","output": "postgresql"}
         ]
+        self._example_selector = SemanticSimilarityExampleSelector.from_examples(
+            self._examples,
+            GoogleGenerativeAIEmbeddings(model="models/text-embedding-004",
+                                         google_api_key=os.getenv("GEMINI_API_KEY")),
+            InMemoryVectorStore,
+            k=2
+        )
 
     def _remove_duplicates(self, result: list[dict]) -> list[str]:
         unique_result = []
@@ -104,15 +112,6 @@ class PdfSelector(metaclass=Singleton):
             self,
             question: dict[str, str]
     ) -> list[str]:
-        # There is a cache problem in langchain and I cannot find it.
-        # It makes the whole process a bit more slower. but it is not a big problem.
-        example_selector = SemanticSimilarityExampleSelector.from_examples(
-            self._examples,
-            GoogleGenerativeAIEmbeddings(model="models/text-embedding-004",
-                                         google_api_key=os.getenv("GEMINI_API_KEY")),
-            Chroma,
-            k=2
-        )
-        example_selector_results: list[dict] = await example_selector.aselect_examples(question)
+        example_selector_results: list[dict] = await self._example_selector.aselect_examples(question)
         results: list[str] = self._remove_duplicates(example_selector_results)
         return results

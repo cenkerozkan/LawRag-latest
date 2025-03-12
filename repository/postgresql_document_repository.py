@@ -25,8 +25,6 @@ class PostgreSQLDocumentRepository:
         self._loader = PyPDFLoader(file_path)
         self._documents = (RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
                            .split_documents(self._loader.load()))
-
-        # Create vector database
         self._db = Chroma.from_documents(
             self._documents,
             GoogleGenerativeAIEmbeddings(
@@ -41,5 +39,4 @@ class PostgreSQLDocumentRepository:
     ) -> str:
         self._logger.info(f"Retrieving documents for query: {query}")
         docs = self._db.similarity_search_by_vector(self._embedding_vector.embed_query(query))
-
         return docs[0].page_content

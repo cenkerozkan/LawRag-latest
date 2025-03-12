@@ -25,8 +25,6 @@ class MongoDbDocumentRepository:
         self._loader = PyPDFLoader(file_path)
         self._documents = (RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
                            .split_documents(self._loader.load()))
-
-        # Create vector database
         self._db = Chroma.from_documents(
             self._documents,
             GoogleGenerativeAIEmbeddings(
@@ -35,11 +33,13 @@ class MongoDbDocumentRepository:
             )
         )
 
+
     def retrieve(
             self,
             query: str
     ) -> str:
         self._logger.info(f"Retrieving documents for query: {query}")
         docs = self._db.similarity_search_by_vector(self._embedding_vector.embed_query(query))
-
+        # NOTE: In docs there is a list of document chunks sorted by their
+        #       relevance to the query. We are returning the most relevant
         return docs[0].page_content

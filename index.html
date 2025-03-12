@@ -1,187 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAG Chat Assistant</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAG Chat Assistant</title>
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
 
-        body {
-            display: flex;
-            height: 100vh;
-            background-color: #343541;
-            color: white;
-        }
+body {
+    display: flex;
+    height: 100vh;
+    background-color: #343541;
+    color: white;
+    overflow: hidden;
+}
 
-        .container {
-            display: flex;
-            flex: 1;
-        }
+.container {
+    display: flex;
+    flex: 1;
+    height: 100%;
+}
 
-        /* Sidebar */
-        .sidebar {
-            width: 280px;
-            background: #202123;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #444;
-            overflow-y: auto;
-        }
+/* Sidebar */
+.sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: #202123;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #444;
+    overflow-y: auto;
+    height: 100%;
+}
 
-        .sidebar h2 {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: #fff;
-        }
+.sidebar h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #fff;
+}
 
-        .new-chat {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
+.new-chat {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
 
-        .new-chat input {
-            flex-grow: 1;
-            padding: 10px;
-            background: #444;
-            border: none;
-            border-radius: 5px;
-            color: white;
-        }
+.new-chat input {
+    flex-grow: 1;
+    padding: 10px;
+    background: #444;
+    border: none;
+    border-radius: 5px;
+    color: white;
+}
 
-        .new-chat button {
-            background: #0d6efd;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+.new-chat button {
+    background: #0d6efd;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
-        .chat-list {
-            margin-top: 15px;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
+.chat-list {
+    margin-top: 15px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
 
-        .chat-item {
-            padding: 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.2s;
-            color: #ccc;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.chat-item {
+    padding: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-        .chat-item:hover {
-            background: #444;
-        }
+.chat-item:hover {
+    background: #444;
+}
 
-        .delete-btn {
-            background: none;
-            border: none;
-            color: #ff5555;
-            cursor: pointer;
-            font-size: 14px;
-        }
+.delete-btn {
+    background: none;
+    border: none;
+    color: #ff5555;
+    cursor: pointer;
+    font-size: 14px;
+}
 
-        /* Main Chat Area */
-        .main-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background: #444654;
-            height: 100vh;
-            padding: 20px;
-        }
+/* Main Chat Area */
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background: #444654;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
 
-        .chat-messages {
-            flex-grow: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            padding-bottom: 80px;
-        }
+.chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    padding-bottom: 80px;
+}
 
-        .message {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin: 8px 0;
-            line-height: 1.4;
-        }
+.message {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 8px 0;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
 
-        .user-message {
-            align-self: flex-end;
-            background: #0d6efd;
-            color: white;
-        }
+.user-message {
+    align-self: flex-end;
+    background: #0d6efd;
+    color: white;
+}
 
-        .assistant-message {
-            align-self: flex-start;
-            background: #555;
-            color: white;
-        }
+.assistant-message {
+    align-self: flex-start;
+    background: #555;
+    color: white;
+}
 
-        /* Input Bar */
-        .input-area {
-            display: flex;
-            position: fixed;
-            bottom: 0;
-            left: 280px;
-            right: 0;
-            background: #40414F;
-            padding: 15px;
-            align-items: center;
-            gap: 10px;
-            border-top: 1px solid #555;
-        }
+/* Input Bar */
+.input-area {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #40414F;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid #555;
+}
 
-        .input-area input {
-            flex-grow: 1;
-            padding: 12px;
-            background: #555;
-            border: none;
-            border-radius: 5px;
-            color: white;
-        }
+.input-area input {
+    flex-grow: 1;
+    padding: 12px;
+    background: #555;
+    border: none;
+    border-radius: 5px;
+    color: white;
+}
 
-        .input-area button {
-            background: #0d6efd;
-            color: white;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+.input-area button {
+    background: #0d6efd;
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
 
-            .sidebar {
-                width: 100%;
-                height: auto;
-                border-right: none;
-                border-bottom: 1px solid #444;
-            }
+    .sidebar {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        max-height: 40vh;
+        border-right: none;
+        border-bottom: 1px solid #444;
+    }
 
-            .input-area {
-                left: 0;
-            }
-        }
-    </style>
+    .main-content {
+        height: 60vh;
+    }
+
+    .input-area {
+        position: absolute;
+    }
+}
+</style>
 </head>
 <body>
 
@@ -203,154 +216,224 @@
         <!-- Input Bar -->
         <div class="input-area">
             <input id="messageInput" type="text" placeholder="Type a message...">
-            <button onclick="sendMessage()">Send</button>
+            <button id="sendButton">Send</button>
         </div>
     </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js"></script>
 <script>
-    const API_BASE_URL = "http://127.0.0.1:8000"; // Base API URL
-    let currentChatId = null;
-    const md = window.markdownit(); // Initialize Markdown-it for rendering markdown
+const API_BASE_URL = "http://127.0.0.1:8000";
+let currentChatId = null;
+const md = window.markdownit();
 
-    async function loadChats() {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/chats`);
-            if (!response.ok) throw new Error("Failed to load chats");
-            const chats = await response.json();
+async function loadChats() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/chats`);
+        if (!response.ok) throw new Error("Failed to load chats");
+        const chats = await response.json();
 
-            const chatList = document.getElementById('chatList');
-            chatList.innerHTML = '';
+        const chatList = document.getElementById('chatList');
+        chatList.innerHTML = '';
 
-            chats.forEach(chat => {
-                const chatItem = document.createElement('div');
-                chatItem.className = 'chat-item';
-                chatItem.innerHTML = `
-                    <span onclick="selectChat('${chat.chat_id}')">${chat.chat_name}</span>
-                    <button class="delete-btn" onclick="deleteChat('${chat.chat_id}')">🗑</button>
-                `;
-                chatList.appendChild(chatItem);
-            });
-        } catch (error) {
-            console.error("Error loading chats:", error);
-            alert("Failed to load chats. Please check your server.");
-        }
+        chats.forEach(chat => {
+            const chatItem = document.createElement('div');
+            chatItem.className = 'chat-item';
+            chatItem.innerHTML = `
+                <span onclick="selectChat('${chat.chat_id}')">${chat.chat_name}</span>
+                <button class="delete-btn" onclick="deleteChat('${chat.chat_id}')">🗑</button>
+            `;
+            chatList.appendChild(chatItem);
+        });
+    } catch (error) {
+        console.error("Error loading chats:", error);
+        alert("Failed to load chats. Please check your server.");
+    }
+}
+
+async function createChat() {
+    const chatNameInput = document.getElementById('newChatName');
+    const chatName = chatNameInput.value.trim();
+
+    if (!chatName) {
+        alert("Chat name cannot be empty!");
+        return;
     }
 
-    async function createChat() {
-        const chatNameInput = document.getElementById('newChatName');
-        const chatName = chatNameInput.value.trim();
-
-        if (!chatName) {
-            alert("Chat name cannot be empty!");
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/chats`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_name: chatName })
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to create chat: ${response.statusText}`);
-            }
-
-            chatNameInput.value = ''; // Clear input field
-            loadChats(); // Refresh chat list
-        } catch (error) {
-            console.error("Error creating chat:", error);
-            alert("Error creating chat. Please try again.");
-        }
-    }
-
-    async function deleteChat(chatId) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/chats/${chatId}`, { method: 'DELETE' });
-
-            if (!response.ok) throw new Error("Failed to delete chat");
-
-            if (currentChatId === chatId) {
-                currentChatId = null;
-                document.getElementById('chatMessages').innerHTML = '';
-            }
-
-            loadChats();
-        } catch (error) {
-            console.error("Error deleting chat:", error);
-            alert("Failed to delete chat. Please try again.");
-        }
-    }
-
-    async function selectChat(chatId) {
-        try {
-            currentChatId = chatId;
-            const response = await fetch(`${API_BASE_URL}/api/chats/${chatId}`);
-            if (!response.ok) throw new Error("Failed to load chat messages");
-
-            const chat = await response.json();
-            displayMessages(chat.history);
-        } catch (error) {
-            console.error("Error selecting chat:", error);
-            alert("Failed to load messages. Please check your server.");
-        }
-    }
-
-    function displayMessages(messages) {
-        const chatMessages = document.getElementById('chatMessages');
-        chatMessages.innerHTML = '';
-
-        messages.forEach(message => {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`;
-
-            // Convert Markdown to HTML safely
-            messageDiv.innerHTML = md.render(message.content);
-
-            chatMessages.appendChild(messageDiv);
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/chats`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_name: chatName })
         });
 
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        if (!response.ok) {
+            throw new Error(`Failed to create chat: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        chatNameInput.value = '';
+        await loadChats();
+
+        if (result && result.chat_id) {
+            selectChat(result.chat_id);
+        }
+    } catch (error) {
+        console.error("Error creating chat:", error);
+        alert("Error creating chat. Please try again.");
     }
+}
 
-    async function sendMessage() {
-        if (!currentChatId) return;
+async function deleteChat(chatId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/chats/${chatId}`, { method: 'DELETE' });
 
-        const messageInput = document.getElementById('messageInput');
-        const message = messageInput.value.trim();
-        if (!message) return;
+        if (!response.ok) throw new Error("Failed to delete chat");
 
-        messageInput.value = '';
+        if (currentChatId === chatId) {
+            currentChatId = null;
+            document.getElementById('chatMessages').innerHTML = '';
+        }
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/chats/${currentChatId}/messages`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ message, chat_id: currentChatId })
-            });
+        loadChats();
+    } catch (error) {
+        console.error("Error deleting chat:", error);
+        alert("Failed to delete chat. Please try again.");
+    }
+}
 
-            if (!response.ok) throw new Error("Failed to send message");
+async function selectChat(chatId) {
+    try {
+        currentChatId = chatId;
+        const response = await fetch(`${API_BASE_URL}/api/chats/${chatId}`);
+        if (!response.ok) throw new Error("Failed to load chat messages");
 
-            await selectChat(currentChatId); // Refresh messages
-        } catch (error) {
-            console.error("Error sending message:", error);
-            alert("Failed to send message. Please try again.");
+        const chat = await response.json();
+        displayMessages(chat.history);
+    } catch (error) {
+        console.error("Error selecting chat:", error);
+        alert("Failed to load messages. Please check your server.");
+    }
+}
+
+function displayMessages(messages) {
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.innerHTML = '';
+
+    messages.forEach(message => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`;
+        messageDiv.innerHTML = md.render(message.content);
+        chatMessages.appendChild(messageDiv);
+    });
+
+    scrollToBottom();
+}
+
+function scrollToBottom() {
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function addUserMessage(message) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message user-message';
+    messageDiv.innerHTML = md.render(message);
+    chatMessages.appendChild(messageDiv);
+    scrollToBottom();
+}
+
+function addAssistantMessageWithStreaming(message) {
+    if (!message) return;
+
+    const chatMessages = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message assistant-message';
+    chatMessages.appendChild(messageDiv);
+
+    const messageText = typeof message === 'string' ? message : JSON.stringify(message);
+
+    let i = 0;
+    const renderedMessage = md.render(messageText);
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = renderedMessage;
+    const textContent = tempDiv.textContent;
+
+    function streamText() {
+        if (i < textContent.length) {
+            const progressText = messageText.substring(0, i + 1);
+            messageDiv.innerHTML = md.render(progressText);
+            i++;
+            scrollToBottom();
+            setTimeout(streamText, 15);
+        } else {
+            messageDiv.innerHTML = renderedMessage;
+            scrollToBottom();
         }
     }
 
-    // Ensure buttons work
-    document.getElementById('createChatButton').addEventListener('click', createChat);
-    document.getElementById('messageInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') sendMessage();
-    });
+    streamText();
+}
 
-    // Load chats on page load
-    loadChats();
+async function sendMessage() {
+    if (!currentChatId) {
+        alert("Please select or create a chat first!");
+        return;
+    }
+
+    const messageInput = document.getElementById('messageInput');
+    const message = messageInput.value.trim();
+    if (!message) return;
+
+    addUserMessage(message);
+    messageInput.value = '';
+
+    try {
+        const sendButton = document.getElementById('sendButton');
+        sendButton.disabled = true;
+
+        const response = await fetch(`${API_BASE_URL}/api/chats/${currentChatId}/messages`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ message, chat_id: currentChatId })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log("API Response:", result);
+
+        if (result) {
+            const assistantMessage = result.assistant_message || result.response || result.message;
+
+            if (assistantMessage) {
+                console.log("Assistant message:", assistantMessage);
+                addAssistantMessageWithStreaming(assistantMessage);
+            } else {
+                console.error("No assistant message found in response:", result);
+                addAssistantMessageWithStreaming("Sorry, I couldn't process that request.");
+            }
+        }
+
+    } catch (error) {
+        console.error("Error sending message:", error);
+        addAssistantMessageWithStreaming("Sorry, an error occurred while processing your message.");
+    } finally {
+        document.getElementById('sendButton').disabled = false;
+    }
+}
+
+document.getElementById('createChatButton').addEventListener('click', createChat);
+document.getElementById('sendButton').addEventListener('click', sendMessage);
+document.getElementById('messageInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') sendMessage();
+});
+
+loadChats();
 </script>
-
-
 
 </body>
 </html>

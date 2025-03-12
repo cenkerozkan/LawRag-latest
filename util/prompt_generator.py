@@ -13,6 +13,7 @@ class PromptGenerator:
                         - Explain concepts in a clear, practical way
                         - Provide your response in plain text, not XML format
                         - Keep your responses focused and to the point
+                        - You can reply to questions about the past interactions based on the context provided.
                     </instruction>
                     <ragcontent>
                         {rag_content}

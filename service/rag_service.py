@@ -135,6 +135,7 @@ class RagService(metaclass=Singleton):
         try:
             contents: list = [str({"role": msg.role, "content": msg.content}) for msg in chat_thread.history[-25:]]
             contents.append(prompt)
+            self._logger.info(f"Contents: {contents}")
             response = self._gemini_client.models.generate_content(
                 model="gemini-2.0-flash",
                 contents=contents

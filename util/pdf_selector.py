@@ -6,10 +6,12 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 
 from meta.singleton import Singleton
+from util.logger import get_logger
 
 
 class PdfSelector(metaclass=Singleton):
     def __init__(self):
+        self._logger = get_logger(__name__)
         self._examples: list = [
             {"input": "How do you insert a document into a MongoDB collection?", "output": "mongodb"},
             {"input": "How can you update multiple documents at once in MongoDB?", "output": "mongodb"},
@@ -90,17 +92,27 @@ class PdfSelector(metaclass=Singleton):
             {"input": "How do you use DELETE ... RETURNING to remove and return a row?", "output": "postgresql"},
             {"input": "How can you safely delete all rows while preserving the table structure?","output": "postgresql"}
         ]
-        self._example_selector = SemanticSimilarityExampleSelector.from_examples(
+
+    def _remove_duplicates(self, result: list[dict]) -> list[str]:
+        unique_result = []
+        for res in result:
+            if "output" in res and res["output"] not in unique_result:
+                unique_result.append(res["output"])
+        return unique_result
+
+    async def aselect(
+            self,
+            question: dict[str, str]
+    ) -> list[str]:
+        # There is a cache problem in langchain and I cannot find it.
+        # It makes the whole process a bit more slower. but it is not a big problem.
+        example_selector = SemanticSimilarityExampleSelector.from_examples(
             self._examples,
             GoogleGenerativeAIEmbeddings(model="models/text-embedding-004",
                                          google_api_key=os.getenv("GEMINI_API_KEY")),
             Chroma,
             k=2
         )
-
-    async def aselect(
-            self,
-            question: dict[str, str]
-    ) -> list[dict[str, str]]:
-        result: list[dict] = await self._example_selector.aselect_examples(question)
-        return result
+        example_selector_results: list[dict] = await example_selector.aselect_examples(question)
+        results: list[str] = self._remove_duplicates(example_selector_results)
+        return results

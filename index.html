@@ -392,6 +392,15 @@ async function sendMessage() {
     try {
         const sendButton = document.getElementById('sendButton');
         sendButton.disabled = true;
+        messageInput.disabled = true;
+
+        // Add a "thinking" message
+        const chatMessages = document.getElementById('chatMessages');
+        const thinkingDiv = document.createElement('div');
+        thinkingDiv.className = 'message assistant-message';
+        thinkingDiv.innerHTML = "<em>Thinking...</em>";
+        chatMessages.appendChild(thinkingDiv);
+        scrollToBottom();
 
         const response = await fetch(`${API_BASE_URL}/api/chats/${currentChatId}/messages`, {
             method: 'POST',
@@ -404,16 +413,14 @@ async function sendMessage() {
         }
 
         const result = await response.json();
-        console.log("API Response:", result);
+        chatMessages.removeChild(thinkingDiv); // Remove "thinking" message
 
         if (result) {
             const assistantMessage = result.assistant_message || result.response || result.message;
 
             if (assistantMessage) {
-                console.log("Assistant message:", assistantMessage);
                 addAssistantMessageWithStreaming(assistantMessage);
             } else {
-                console.error("No assistant message found in response:", result);
                 addAssistantMessageWithStreaming("Sorry, I couldn't process that request.");
             }
         }
@@ -423,8 +430,10 @@ async function sendMessage() {
         addAssistantMessageWithStreaming("Sorry, an error occurred while processing your message.");
     } finally {
         document.getElementById('sendButton').disabled = false;
+        document.getElementById('messageInput').disabled = false;
     }
 }
+
 
 document.getElementById('createChatButton').addEventListener('click', createChat);
 document.getElementById('sendButton').addEventListener('click', sendMessage);

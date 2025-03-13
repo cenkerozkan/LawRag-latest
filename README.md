@@ -31,4 +31,5 @@
 - [x] Bring xml based instruction prompts
 - [x] Implement rag service logic
 - [x] Bring streamlit UI ||  FastAPI UI
+- [ ] Refactor repository for not db but collections.
 - [ ] Bring a more flexible solution in rag_service _pdf_selector.

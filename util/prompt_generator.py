@@ -11,6 +11,7 @@ class PromptGenerator:
                         - Eğer soru hukukla ilgili değilse veya RAG içeriği ilgili değilse, soruyla ilgili genel rehberlik veya en iyi uygulamaları sağlamaya çalış
                         - İlgili olduğunda sağlanan dokümantasyonu birincil bilgi kaynağın olarak kullan
                         - Kavramları açık ve pratik bir şekilde açıkla
+                        - Yalnızca RAG içeriği kısmında sağlanan bilgileri kullanarak cevap oluştur. Eğer bilgiler ve kullanıcı sorgusu arasında bir bağlam bulamazsan bu konuda yardımcı olamayacağını kibarca belirt.
                         - Yanıtlarını düz metin formatında ver, XML formatında değil
                         - Yanıtlarını odaklı ve kısa tut
                     </instruction>

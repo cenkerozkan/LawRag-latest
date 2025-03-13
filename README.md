@@ -32,4 +32,5 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 - [x] Implement rag service logic
 - [x] Bring streamlit UI ||  FastAPI UI
 - [ ] Refactor repository for not db but collections.
+- [ ] Add used_pdfs field in message model
 - [ ] Bring a more flexible solution in rag_service _pdf_selector.

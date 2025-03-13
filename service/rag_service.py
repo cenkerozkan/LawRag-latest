@@ -7,7 +7,7 @@ from db.model.chat_thread_model import ChatThreadModel
 from db.model.message_model import MessageModel
 from meta.singleton import Singleton
 from repository.worker_laws_document_repository import WorkerLawsDocumentRepository
-from repository.postgresql_document_repository import ObligationsLawsDocumentRepository
+from repository.obligations_laws_document_repository import ObligationsLawsDocumentRepository
 from repository.context_repository import ContextRepository
 from util.pdf_selector import PdfSelector
 from util.logger import get_logger

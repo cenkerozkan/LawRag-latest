@@ -6,7 +6,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-class PostgreSQLDocumentRepository:
+class ObligationsLawsDocumentRepository:
     def __init__(
             self,
             file_path: str

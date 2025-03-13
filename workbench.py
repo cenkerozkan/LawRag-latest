@@ -18,8 +18,8 @@ RAG REPOSITORY TEST
 """
 from service.rag_service import RagService
 
-from repository.mongodb_document_repository import MongoDbDocumentRepository
-from repository.postgresql_document_repository import PostgreSQLDocumentRepository
+from repository.worker_laws_document_repository import WorkerLawsDocumentRepository
+from repository.postgresql_document_repository import ObligationsLawsDocumentRepository
 
 #obj = MongoDbDocumentRepository(file_path="./pdf/MongoDB_Cheat_Sheet.pdf")
 #obj_2 = PostgreSQLDocumentRepository(file_path="./pdf/PostgreSQL_Cheat_Sheet.pdf")

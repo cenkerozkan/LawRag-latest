@@ -6,7 +6,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-class MongoDbDocumentRepository:
+class WorkerLawsDocumentRepository:
     def __init__(
             self,
             file_path: str

@@ -6,8 +6,8 @@ import sys
 from db.model.chat_thread_model import ChatThreadModel
 from db.model.message_model import MessageModel
 from meta.singleton import Singleton
-from repository.mongodb_document_repository import MongoDbDocumentRepository
-from repository.postgresql_document_repository import PostgreSQLDocumentRepository
+from repository.worker_laws_document_repository import WorkerLawsDocumentRepository
+from repository.postgresql_document_repository import ObligationsLawsDocumentRepository
 from repository.context_repository import ContextRepository
 from util.pdf_selector import PdfSelector
 from util.logger import get_logger
@@ -26,8 +26,8 @@ class RagService(metaclass=Singleton):
             self._gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
             self._pdf_selector = PdfSelector()
             self._context_repository = ContextRepository()
-            self._mongodb_repository = MongoDbDocumentRepository(file_path="./pdf/MongoDB_Cheat_Sheet.pdf")
-            self._postgresql_repository = PostgreSQLDocumentRepository(file_path="./pdf/PostgreSQL_Cheat_Sheet.pdf")
+            self._worker_laws_repository = WorkerLawsDocumentRepository(file_path="./pdf/is_isci_kanun.pdf")
+            self._obligations_laws_repository = ObligationsLawsDocumentRepository(file_path="./pdf/borclar_kanun.pdf")
         except Exception as e:
             self._logger.error(f"Error initializing RagService: {e}")
 
@@ -52,14 +52,14 @@ class RagService(metaclass=Singleton):
             pdfs = await self._select_pdfs(query)
             self._logger.info(f"Selected pdfs: {pdfs}")
             for pdf in pdfs:
-                if pdf == "mongodb":
-                    mongo_result = self._mongodb_repository.retrieve(query)
-                    self._logger.info(f"MongoDB result: {mongo_result}")
-                    result += mongo_result
-                elif pdf == "postgresql":
-                    postgres_result = self._postgresql_repository.retrieve(query)
-                    self._logger.info(f"PostgreSQL result: {postgres_result}")
-                    result += postgres_result
+                if pdf == "is_isci_kanun":
+                    work_laws_result = self._worker_laws_repository.retrieve(query)
+                    self._logger.info(f"Work laws result: {work_laws_result}")
+                    result += work_laws_result
+                elif pdf == "borclar_kanun":
+                    obligations_laws_result = self._obligations_laws_repository.retrieve(query)
+                    self._logger.info(f"Obligations laws result result: {obligations_laws_result}")
+                    result += obligations_laws_result
 
         except Exception as e:
             self._logger.error(f"Error retrieving rag: {e}")

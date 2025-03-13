@@ -12,7 +12,7 @@ class PromptGenerator:
                         - İlgili olduğunda sağlanan dokümantasyonu birincil bilgi kaynağın olarak kullan
                         - Kavramları açık ve pratik bir şekilde açıkla
                         - Yanıtlarını mümkün olduğunca RAG içeriğinde sağlanan bilgiler eşliğinde vermen çok önemli, fakat az da olsa kendi bilgini katabilirsin.
-                        - Her yanıt verdiğinde senin profesyonel bir hukukçu olmadığını, bu konular için profesyonellere danışılması gerektiğini eklemelisin.
+                        - Hukukla ilgili bir yanıt verdiğinde senin profesyonel bir hukukçu olmadığını, bu konular için profesyonellere danışılması gerektiğini eklemelisin.
                         - Yanıtlarını düz metin formatında ver, XML formatında değil
                         - Yanıtlarını odaklı ve kısa tut
                     </instruction>

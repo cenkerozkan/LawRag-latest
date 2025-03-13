@@ -53,11 +53,11 @@ class RagService(metaclass=Singleton):
             self._logger.info(f"Selected pdfs: {pdfs}")
             for pdf in pdfs:
                 if pdf == "is_isci_kanun":
-                    work_laws_result = self._worker_laws_repository.retrieve(query)
+                    work_laws_result = await self._worker_laws_repository.aretrieve(query)
                     self._logger.info(f"Work laws result: {work_laws_result}")
                     result += work_laws_result
                 elif pdf == "borclar_kanun":
-                    obligations_laws_result = self._obligations_laws_repository.retrieve(query)
+                    obligations_laws_result = await self._obligations_laws_repository.aretrieve(query)
                     self._logger.info(f"Obligations laws result result: {obligations_laws_result}")
                     result += obligations_laws_result
 
@@ -84,6 +84,7 @@ class RagService(metaclass=Singleton):
             query: str,
             chat_thread: ChatThreadModel
     ) -> str:
+        # Create a new message model and append it to the chat thread
         message_model: MessageModel = MessageModel(
             created_at=datetime.datetime.now().isoformat(),
             role="user",
@@ -92,6 +93,7 @@ class RagService(metaclass=Singleton):
         chat_thread.history.append(message_model)
         chat_thread.updated_at = datetime.datetime.now().isoformat()
 
+        # Retrieve the document content and generate a prompt
         document_content: str = await self._retrieve_document_content(query)
         prompt: str = self._prompt_generator.generate_prompt(rag_content=document_content, user_query=query)
         response: any

@@ -353,28 +353,26 @@ function addAssistantMessageWithStreaming(message) {
     chatMessages.appendChild(messageDiv);
 
     const messageText = typeof message === 'string' ? message : JSON.stringify(message);
-
+    let words = messageText.split(" "); // Split by words
     let i = 0;
-    const renderedMessage = md.render(messageText);
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = renderedMessage;
-    const textContent = tempDiv.textContent;
+    let tempText = ""; // Temporary text holder
 
     function streamText() {
-        if (i < textContent.length) {
-            const progressText = messageText.substring(0, i + 1);
-            messageDiv.innerHTML = md.render(progressText);
+        if (i < words.length) {
+            tempText += (i === 0 ? "" : " ") + words[i]; // Append word with space
+            messageDiv.innerHTML = md.render(tempText + " ▌"); // Render Markdown + cursor effect
             i++;
             scrollToBottom();
-            setTimeout(streamText, 15);
+            setTimeout(streamText, 100); // Adjust speed here
         } else {
-            messageDiv.innerHTML = renderedMessage;
+            messageDiv.innerHTML = md.render(tempText); // Final render without cursor
             scrollToBottom();
         }
     }
 
     streamText();
 }
+
 
 async function sendMessage() {
     if (!currentChatId) {

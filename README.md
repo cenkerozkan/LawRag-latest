@@ -25,9 +25,10 @@
 - [x] Implement MongoDB connector
 - [x] Implement message history storage in MongoDB
 - [x] Increase k in semantic pdf simulator for multiple rag.
-- [ ] Add new fields into message history part in MongoDB Model
-- [ ] Bring xml based instruction prompts
-- [ ] Implement rag service logic
-- [ ] Bring streamlit UI ||  FastAPI UI
+- [x] Refactor rag_service, remove chat_thread related methods
+- [x] Create a new service for managing chat threads.
+- [x] Add new fields into message history part in MongoDB Model
+- [x] Bring xml based instruction prompts
+- [x] Implement rag service logic
+- [x] Bring streamlit UI ||  FastAPI UI
 - [ ] Bring a more flexible solution in rag_service _pdf_selector.
-- [ ] Bring streaming if streamlit supports it.

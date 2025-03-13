@@ -79,42 +79,6 @@ class RagService(metaclass=Singleton):
 
         return is_updated
 
-    async def retrieve_chat_thread(
-            self,
-            chat_id: str
-    ) -> ChatThreadModel | None:
-        self._logger.info(f"Retrieving chat thread: {chat_id}")
-        result: ChatThreadModel | None = await self._context_repository.get_one_by_id(chat_id)
-
-        return result
-
-    async def create_new_chat_thread(
-            self,
-            chat_name: str
-    ) -> ChatThreadModel | None:
-        new_chat = ChatThreadModel(
-            chat_name=chat_name,
-            chat_id=uuid_generator(),
-            created_at=datetime.datetime.now().isoformat(),
-            updated_at=datetime.datetime.now().isoformat(),
-            history=[]
-        )
-
-        is_created: bool = await self._context_repository.insert_one(new_chat)
-        if is_created:
-            return new_chat
-
-        return None
-
-    async def delete_chat_thread(
-            self,
-            chat_id: str
-    ) -> bool:
-        self._logger.info(f"Deleting chat thread: {chat_id}")
-        is_deleted: bool = await self._context_repository.delete_one_by_id(chat_id)
-
-        return is_deleted
-
     async def send_message(
             self,
             query: str,

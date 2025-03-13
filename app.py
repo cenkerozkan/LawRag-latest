@@ -7,6 +7,7 @@ import asyncio
 from typing import List
 
 from service.rag_service import RagService
+from service.chat_thread_service import ChatThreadService
 from db.model.chat_thread_model import ChatThreadModel
 import os
 from dotenv import load_dotenv
@@ -14,6 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 app = FastAPI()
 rag_service = RagService()
+chat_thread_service = ChatThreadService()
 
 # Enable CORS
 app.add_middleware(
@@ -38,32 +40,33 @@ async def read_root():
 
 @app.post("/api/chats")
 async def create_chat(chat: ChatCreate):
-    result = await rag_service.create_new_chat_thread(chat.chat_name)
+    result = await chat_thread_service.create_chat_thread(chat.chat_name)
     if not result:
         raise HTTPException(status_code=400, detail="Failed to create chat")
     return result
 
 @app.get("/api/chats")
 async def get_chats():
-    return await rag_service._context_repository.get_all()
+    result: list[ChatThreadModel] = await chat_thread_service.retrieve_all_chat_threads()
+    return result
 
 @app.get("/api/chats/{chat_id}")
 async def get_chat(chat_id: str):
-    chat = await rag_service.retrieve_chat_thread(chat_id)
+    chat = await chat_thread_service.retrieve_chat_thread(chat_id)
     if not chat:
         raise HTTPException(status_code=404, detail="Chat not found")
     return chat
 
 @app.delete("/api/chats/{chat_id}")
 async def delete_chat(chat_id: str):
-    success = await rag_service.delete_chat_thread(chat_id)
+    success = await chat_thread_service.delete_chat_thread(chat_id)
     if not success:
         raise HTTPException(status_code=404, detail="Chat not found")
     return {"success": True}
 
 @app.post("/api/chats/{chat_id}/messages")
 async def send_message(chat_id: str, message: MessageSend):
-    chat = await rag_service.retrieve_chat_thread(chat_id)
+    chat = await chat_thread_service.retrieve_chat_thread(chat_id)
     if not chat:
         raise HTTPException(status_code=404, detail="Chat not found")
     response = await rag_service.send_message(message.message, chat)

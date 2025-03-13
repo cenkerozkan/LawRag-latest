@@ -42,4 +42,4 @@ class WorkerLawsDocumentRepository:
         docs = self._db.similarity_search_by_vector(self._embedding_vector.embed_query(query))
         # NOTE: In docs there is a list of document chunks sorted by their
         #       relevance to the query. We are returning the most relevant
-        return docs[0].page_content + docs[1].page_content
+        return docs[0].page_content + docs[1].page_content + docs[2].page_content

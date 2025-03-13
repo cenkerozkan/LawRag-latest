@@ -39,4 +39,4 @@ class ObligationsLawsDocumentRepository:
     ) -> str:
         self._logger.info(f"Retrieving documents for query: {query}")
         docs = self._db.similarity_search_by_vector(self._embedding_vector.embed_query(query))
-        return docs[0].page_content + docs[1].page_content
+        return docs[0].page_content + docs[1].page_content + docs[2].page_content

@@ -93,7 +93,6 @@ class RagService(metaclass=Singleton):
         chat_thread.updated_at = datetime.datetime.now().isoformat()
 
         document_content: str = await self._retrieve_document_content(query)
-        self._logger.info(f"DOCUMENT: {document_content}")
         prompt: str = self._prompt_generator.generate_prompt(rag_content=document_content, user_query=query)
         response: any
         try:

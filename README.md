@@ -1,13 +1,13 @@
-# 📌 DB Cheat Sheet RAG
+# 📌 Law-RAG Cheat Sheet
 
-**A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for message history** – This project allows users to select relevant PDFs based on their input using semantic similarity and then generate responses accordingly.
+A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for message history – This project focuses on legal documents, allowing users to select relevant legal PDFs based on their input using semantic similarity and then generate responses accordingly.
 
 ## 🚀 Features
+✅ Semantic Similarity-Based Legal PDF Selection  
+✅ Integration with LangChain for RAG  
+✅ Efficient Retrieval and Query Processing for Legal Documents  
+✅ MongoDB Integration for Message History Storage  
 
-- ✅ **Semantic Similarity-Based PDF Selection**
-- ✅ **Integration with LangChain for RAG**
-- ✅ **Efficient Retrieval and Query Processing**
-- ✅ **MongoDB Integration for Message History Storage**
 
 ## 🛠️ Tech Stack
 

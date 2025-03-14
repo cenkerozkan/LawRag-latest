@@ -31,6 +31,9 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 - [x] Bring xml based instruction prompts
 - [x] Implement rag service logic
 - [x] Bring streamlit UI ||  FastAPI UI
+- [ ] Bring more document repositories for different law areas to increase accuracy.
+- [ ] Increase the security in the prompt.
+- [ ] Create a word map for each law document to change the pdf selector examples
 - [ ] Refactor repository for not db but collections.
 - [ ] Add used_pdfs field in message model
 - [ ] Bring a more flexible solution in rag_service _pdf_selector.

@@ -152,6 +152,19 @@ class ContextRepository(MongoDBRepositoryBase):
     ) -> bool:
         return False
 
+    async def delete_one(
+            self,
+            chat_history: ChatThreadModel
+    ) -> bool:
+        result: bool = False
+        try:
+            await self._collection.delete_one({"chat_id": chat_history.chat_id})
+            result = True
+        except Exception as e:
+            self._logger.error(e)
+            raise Exception(e)
+        return result
+
     async def delete_one_by_id(
             self,
             id: str

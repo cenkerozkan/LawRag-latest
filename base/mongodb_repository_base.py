@@ -21,3 +21,7 @@ class MongoDBRepositoryBase(ABC):
     @abstractmethod
     async def update_many(self, document):
         raise NotImplementedError
+
+    @abstractmethod
+    async def delete_one(self, document):
+        raise NotImplementedError

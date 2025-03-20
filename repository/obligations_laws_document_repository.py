@@ -1,16 +1,18 @@
 import os
 from util.logger import get_logger
+from base.document_repository_base import DocumentRepositoryBase
 from langchain_community.vectorstores import FAISS
 from langchain_cohere.embeddings import CohereEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-class ObligationsLawsDocumentRepository:
+class ObligationsLawsDocumentRepository(DocumentRepositoryBase):
     def __init__(
             self,
             file_path: str
     ):
+        super().__init__()
         self._logger = get_logger(__name__)
         self._logger.info(f"Initializing PostgreSQL Document Repository")
 
@@ -22,7 +24,7 @@ class ObligationsLawsDocumentRepository:
         self._db = FAISS.from_documents(
             self._documents,
             CohereEmbeddings(
-                model="embed-multilingual-v3.0",
+                model=self._model,
             )
         )
 

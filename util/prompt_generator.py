@@ -6,7 +6,7 @@ class PromptGenerator:
         prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
                 <prompt>
                     <instruction>
-                        Sen, Borçlar Kanunu ve İş İşçi Kanunları konusunda uzman bir hukuk danışmanısın.
+                        Sen uzman bir hukuk danışmanısın.
                         - İlk olarak, sağlanan dokümantasyonun (RAG içeriği) kullanıcının sorusuyla ilgili olup olmadığını değerlendir
                         - Eğer soru hukukla ilgili değilse veya RAG içeriği ilgili değilse, soruyla ilgili yardımcı olamayacağını söyle.
                         - İlgili olduğunda sağlanan dokümantasyonu birincil bilgi kaynağın olarak kullan

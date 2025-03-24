@@ -14,7 +14,7 @@ class WorkerLawsDocumentRepository(DocumentRepositoryBase):
     ):
         super().__init__()
         self._logger = get_logger(__name__)
-        self._logger.info(f"Initializing MongoDB Document Repository")
+        self._logger.info(f"Initializing is_isci_kanunlari Document Repository")
 
         # Load and process documents (formerly in BaseDocumentRepository)
         self._logger.info(f"Loading documents from file: {file_path}")

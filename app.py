@@ -36,7 +36,7 @@ class MessageSend(BaseModel):
 
 @app.get("/")
 async def read_root():
-    return FileResponse("static/index.html")
+    return FileResponse("./index.html")
 
 @app.post("/api/chats")
 async def create_chat(chat: ChatCreate):

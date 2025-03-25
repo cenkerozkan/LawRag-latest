@@ -11,7 +11,7 @@ class PromptGenerator:
                         - Eğer soru hukukla ilgili değilse veya RAG içeriği ilgili değilse, soruyla ilgili yardımcı olamayacağını söyle.
                         - İlgili olduğunda sağlanan dokümantasyonu birincil bilgi kaynağın olarak kullan
                         - Kavramları açık ve pratik bir şekilde açıkla
-                        - Yanıtlarını mümkün olduğunca RAG içeriğinde sağlanan bilgiler eşliğinde vermen çok önemli, fakat az da olsa kendi bilgini katabilirsin.
+                        - Yanıtlarında %70 oranında RAG içeriğini kullan, %30 oranında kendi bilgini kullan.
                         - Hukukla ilgili bir yanıt verdiğinde senin profesyonel bir hukukçu olmadığını, bu konular için profesyonellere danışılması gerektiğini eklemelisin.
                         - Yanıtlarını düz metin formatında ver, XML formatında değil
                         - Yanıtlarını odaklı ve kısa tut

@@ -12,35 +12,35 @@ from util.logger import get_logger
 
 class PdfSelector(metaclass=Singleton):
     def __init__(self):
-        self._logger = get_logger(__name__)
         self._examples: list = [
-            {"input": "İşçi hakları nelerdir?", "output": "is_isci_kanun"},
-            {"input": "İşten çıkarılma durumunda işçinin hakları nelerdir?", "output": "is_isci_kanun"},
-            {"input": "İşçi maaşları nasıl belirlenir?", "output": "is_isci_kanun"},
-            {"input": "İşçi sendikalarının görevleri nelerdir?", "output": "is_isci_kanun"},
-            {"input": "İş kazası durumunda işçinin hakları nelerdir?", "output": "is_isci_kanun"},
-            {"input": "İşçi izin hakları nelerdir?", "output": "is_isci_kanun"},
-            {"input": "İşçi tazminat hakları nelerdir?", "output": "is_isci_kanun"},
-            {"input": "İşçi çalışma saatleri nasıl düzenlenir?", "output": "is_isci_kanun"},
-            {"input": "İşçi sendikalarına üye olma hakkı var mı?", "output": "is_isci_kanun"},
-            {"input": "İşçi grev hakkı nedir?", "output": "is_isci_kanun"},
-            {"input": "borclar_kanunnda kira sözleşmeleri nasıl düzenlenir?", "output": "borclar_kanun"},
-            {"input": "borclar_kanunnda alacaklı ve borçlu hakları nelerdir?", "output": "borclar_kanun"},
-            {"input": "borclar_kanunnda temerrüt nedir?", "output": "borclar_kanun"},
-            {"input": "borclar_kanunnda kefalet nasıl düzenlenir?", "output": "borclar_kanun"},
-            {"input": "borclar_kanunnda sözleşme feshi nasıl yapılır?", "output": "borclar_kanun"},
-            {"input": "borclar_kanunnda tazminat nasıl hesaplanır?", "output": "borclar_kanun"},
-            {"input": "borclar_kanunnda zamanaşımı süreleri nelerdir?", "output": "borclar_kanun"},
-            {"input": "borclar_kanunnda haksız fiil nedir?", "output": "borclar_kanun"},
-            {"input": "borclar_kanunnda müteselsil borçluluk nedir?", "output": "borclar_kanun"},
-            {"input": "borclar_kanunnda kira artışı nasıl yapılır?", "output": "borclar_kanun"}
+            {"input": "İşçi hakları", "output": "is_isci_kanun"},
+            {"input": "İş sözleşmesi", "output": "is_isci_kanun"},
+            {"input": "Kıdem tazminatı", "output": "is_isci_kanun"},
+            {"input": "İhbar tazminatı", "output": "is_isci_kanun"},
+            {"input": "Fazla mesai ücreti", "output": "is_isci_kanun"},
+            {"input": "İş güvencesi", "output": "is_isci_kanun"},
+            {"input": "Sendikal haklar", "output": "is_isci_kanun"},
+            {"input": "İş kazası tazminatı", "output": "is_isci_kanun"},
+            {"input": "Yıllık izin hakkı", "output": "is_isci_kanun"},
+            {"input": "Asgari ücret", "output": "is_isci_kanun"},
+            {"input": "Borçlar hukuku", "output": "borclar_kanun"},
+            {"input": "Müteselsil borç", "output": "borclar_kanun"},
+            {"input": "Sözleşmeden doğan borçlar", "output": "borclar_kanun"},
+            {"input": "Haksız fiil", "output": "borclar_kanun"},
+            {"input": "Sebepsiz zenginleşme", "output": "borclar_kanun"},
+            {"input": "Kira sözleşmesi", "output": "borclar_kanun"},
+            {"input": "Kira artışı", "output": "borclar_kanun"},
+            {"input": "Borçlu ve alacaklı hakları", "output": "borclar_kanun"},
+            {"input": "Tazminat yükümlülükleri", "output": "borclar_kanun"},
+            {"input": "Sorumluluk halleri", "output": "borclar_kanun"}
         ]
+        self._logger = get_logger(__name__)
         self._example_selector = SemanticSimilarityExampleSelector.from_examples(
             self._examples,
             GoogleGenerativeAIEmbeddings(model="models/text-embedding-004",
                                          google_api_key=os.getenv("GEMINI_API_KEY")),
             InMemoryVectorStore,
-            k=2
+            k=5
         )
 
     def _remove_duplicates(self, result: list[dict]) -> list[str]:

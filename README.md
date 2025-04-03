@@ -38,3 +38,4 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 - [ ] Add used_pdfs field in message model
 - [ ] Bring a more flexible solution in rag_service _pdf_selector.
 - [ ] Implement mini agents, starting with decider agent. 
+- [ ] Try vertex ai gecko multilingual embedding.

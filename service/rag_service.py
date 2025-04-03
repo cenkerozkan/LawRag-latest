@@ -17,7 +17,7 @@ from util.prompt_generator import PromptGenerator
 from starlette.concurrency import run_in_threadpool
 from google import genai
 
-class RagService(metaclass=Singleton):
+class RagService:
     def __init__(self):
         self._logger = get_logger(__name__)
         self._prompt_generator = PromptGenerator()

@@ -10,7 +10,7 @@ from repository.context_repository import ContextRepository
 from util.logger import get_logger
 from util.uuid_generator import uuid_generator
 
-class ChatThreadService(metaclass=Singleton):
+class ChatThreadService:
     def __init__(self):
         self._logger = get_logger(__name__)
         self._context_repository = ContextRepository()

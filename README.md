@@ -40,3 +40,5 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 - [ ] Implement mini agents, starting with decider agent. 
 - [ ] Try vertex ai gecko multilingual embedding.
 - [ ] For each document repository, create a method that inserts related docs with uuids.
+- [ ] Move self._db to DocumentRepositoryBase.
+- [ ] Add metadata filtering for FAISS queries.

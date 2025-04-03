@@ -39,3 +39,4 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 - [ ] Bring a more flexible solution in rag_service _pdf_selector.
 - [ ] Implement mini agents, starting with decider agent. 
 - [ ] Try vertex ai gecko multilingual embedding.
+- [ ] For each document repository, create a method that inserts related docs with uuids.

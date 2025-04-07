@@ -21,6 +21,8 @@ class ObligationsLawsDocumentRepository(DocumentRepositoryBase):
         self._loader = PyPDFLoader(file_path)
         self._documents = (RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=100)
                            .split_documents(self._loader.load()))
+        for doc in self._documents:
+            doc.metadata["source"] = self.__class__.__name__
         self._db = FAISS.from_documents(
             self._documents,
             CohereEmbeddings(
@@ -33,5 +35,5 @@ class ObligationsLawsDocumentRepository(DocumentRepositoryBase):
             query: str
     ) -> str:
         self._logger.info(f"Retrieving documents for query: {query}")
-        docs = await self._db.asimilarity_search(query)
-        return docs[0].page_content + docs[1].page_content + docs[2].page_content
+        docs = await self._db.asimilarity_search(query=query, filter={"source": {"$eq": self.__class__.__name__}})
+        return str("Borçlar Hukuku RAG Context\n-----" + docs[0].page_content + docs[1].page_content + docs[2].page_content)

@@ -13,7 +13,7 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 
 - **LLM Framework**: LangChain (for retrieval and generation)
 - **Embedding Models**: Google
-- **Vector Database**: ChromaDB
+- **Vector Database**: FAISS
 - **LLM**: Google
 - **Backend**: FastAPI, Python
 - **Database**: MongoDB (for message history)
@@ -31,6 +31,8 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 - [x] Bring xml based instruction prompts
 - [x] Implement rag service logic
 - [x] Bring streamlit UI ||  FastAPI UI
+- [ ] Implement a caching mechanism with redis for accessing chats
+- [ ] Use nltk to count tokens for each user message.
 - [ ] Bring more document repositories for different law areas to increase accuracy.
 - [ ] Increase the security in the prompt.
 - [ ] Create a word map for each law document to change the pdf selector examples

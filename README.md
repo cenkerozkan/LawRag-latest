@@ -31,6 +31,9 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 - [x] Bring xml based instruction prompts
 - [x] Implement rag service logic
 - [x] Bring streamlit UI ||  FastAPI UI
+- [x] Add metadata filtering for FAISS queries.
+- [ ] Implement a new UI with streamlit.
+- [x] Bring a scaffolding Mechanism in the Makefile.
 - [ ] Implement a caching mechanism with redis for accessing chats
 - [ ] Use nltk to count tokens for each user message.
 - [ ] Bring more document repositories for different law areas to increase accuracy.
@@ -42,5 +45,3 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 - [ ] Implement mini agents, starting with decider agent. 
 - [ ] Try vertex ai gecko multilingual embedding.
 - [ ] For each document repository, create a method that inserts related docs with uuids.
-- [ ] Move self._db to DocumentRepositoryBase.
-- [ ] Add metadata filtering for FAISS queries.

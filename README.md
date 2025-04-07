@@ -13,7 +13,7 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 
 - **LLM Framework**: LangChain (for retrieval and generation)
 - **Embedding Models**: Google
-- **Vector Database**: ChromaDB
+- **Vector Database**: FAISS
 - **LLM**: Google
 - **Backend**: FastAPI, Python
 - **Database**: MongoDB (for message history)

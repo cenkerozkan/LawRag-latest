@@ -8,6 +8,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 class ObligationsLawsDocumentRepository(DocumentRepositoryBase):
+    __slots__ = ('_loader', '_documents', '_logger')
     def __init__(
             self,
             file_path: str
@@ -36,4 +37,4 @@ class ObligationsLawsDocumentRepository(DocumentRepositoryBase):
     ) -> str:
         self._logger.info(f"Retrieving documents for query: {query}")
         docs = await self._db.asimilarity_search(query=query, filter={"source": {"$eq": self.__class__.__name__}})
-        return str("Borçlar Hukuku RAG Context\n-----" + docs[0].page_content + docs[1].page_content + docs[2].page_content)
+        return str(f"{self.__class__.__name__} RAG Context\n-----" + docs[0].page_content + docs[1].page_content + docs[2].page_content)

@@ -8,6 +8,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 class {{ClassName}}(DocumentRepositoryBase):
+    __slots__ = ('_loader', '_documents', '_logger')
     def __init__(self, file_path: str):
         super().__init__()
         self._logger = get_logger(__name__)

@@ -34,7 +34,9 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 - [x] Add metadata filtering for FAISS queries.
 - [ ] Implement a new UI with streamlit.
 - [ ] Implement a generic repository for custom documents uploaded by the user.
-- [x] Bring a scaffolding Mechanism in the Makefile.
+  - [ ] Implement a file upload mechanism.
+- [ ] Bring a scaffolding mechanism for MongoDB repositories.
+- [x] Bring a scaffolding Mechanism for document repositories.
 - [ ] Implement a caching mechanism with redis for accessing chats
 - [ ] Use nltk to count tokens for each user message.
 - [ ] Bring more document repositories for different law areas to increase accuracy.

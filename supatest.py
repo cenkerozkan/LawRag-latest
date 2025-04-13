@@ -17,7 +17,13 @@ class SupabaseService:
 
         self.supabase: Client = create_client(supabase_url, supabase_key)
         self.download_directory = Path("pdf")
-        self.download_directory.mkdir(exist_ok=True)
+
+        # Create pdf directory if it doesn't exist
+        if not self.download_directory.exists():
+            self.download_directory.mkdir()
+            print(f"Created directory: {self.download_directory}")
+        else:
+            print(f"Using existing directory: {self.download_directory}")
 
     async def list_pdfs(self, bucket_name="kanunlar"):
         """

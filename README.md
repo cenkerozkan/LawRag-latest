@@ -50,3 +50,28 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 - [ ] Add used_pdfs field in message model
 - [ ] Bring a more flexible solution in rag_service _pdf_selector.
 - [ ] Try vertex ai gecko multilingual embedding.
+
+## 🚀 How to Run
+
+### Prerequisites
+- MongoDB running locally
+- Python 3.8+
+
+### Installation & Setup
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/yourusername/law-rag.git
+   cd law-rag
+
+2. Install dependencies
+   ```bash
+   pip install -r requirements.txt
+   ```
+   
+3. Start FastAPI server
+   ```bash
+   uvicorn app:app --reload --port 8000 --host 0.0.0.0
+   ```
+
+4. Access the API at `http://localhost:8000/` for test UI.

@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -10,11 +11,37 @@ from dotenv import load_dotenv
 from util.supatest import SupabaseService
 
 load_dotenv()
-app = FastAPI()
 
-# Move service initialization to after startup event
+# Global service variables
 rag_service: RagService = None
 chat_thread_service: ChatThreadService = None
+
+
+# Define lifespan context manager
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Initialize services after PDF download
+    global rag_service, chat_thread_service
+
+    print("Starting PDF download from Supabase...")
+    supabase_service = SupabaseService()
+    downloaded_pdfs = await supabase_service.download_pdfs()
+    print(f"Downloaded {len(downloaded_pdfs)} PDFs to pdf directory")
+
+    # Initialize services AFTER PDFs are downloaded
+    print("Initializing RAG and chat services...")
+    rag_service = RagService()
+    chat_thread_service = ChatThreadService()
+    print("Application startup complete!")
+
+    yield
+
+    # Shutdown: Add cleanup logic here if needed
+    print("Application shutting down...")
+
+
+# Create FastAPI app with lifespan
+app = FastAPI(lifespan=lifespan)
 
 # Enable CORS
 app.add_middleware(
@@ -34,23 +61,6 @@ class ChatCreate(BaseModel):
 class MessageSend(BaseModel):
     message: str
     chat_id: str
-
-
-# Run Supabase download on startup before initializing services
-@app.on_event("startup")
-async def startup_event():
-    global rag_service, chat_thread_service
-
-    print("Starting PDF download from Supabase...")
-    supabase_service = SupabaseService()
-    downloaded_pdfs = await supabase_service.download_pdfs()
-    print(f"Downloaded {len(downloaded_pdfs)} PDFs to pdf directory")
-
-    # Initialize services AFTER PDFs are downloaded
-    print("Initializing RAG and chat services...")
-    rag_service = RagService()
-    chat_thread_service = ChatThreadService()
-    print("Application startup complete!")
 
 
 @app.get("/")

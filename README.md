@@ -35,6 +35,7 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 - [ ] Implement a new UI with streamlit.
 - [ ] Implement a generic repository for custom documents uploaded by the user.
   - [ ] Implement a file upload mechanism.
+  - [ ] Use InMemoryVectorStore for custom user documents.
 - [ ] Bring a scaffolding mechanism for MongoDB repositories.
 - [x] Bring a scaffolding Mechanism for document repositories.
 - [ ] Implement a caching mechanism with redis for accessing chats

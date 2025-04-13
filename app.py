@@ -1,17 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-import asyncio
-from typing import List
 
 from service.rag_service import RagService
 from service.chat_thread_service import ChatThreadService
 from db.model.chat_thread_model import ChatThreadModel
-import os
 from dotenv import load_dotenv
-from supatest import SupabaseService
+from util.supatest import SupabaseService
 
 load_dotenv()
 app = FastAPI()

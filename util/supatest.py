@@ -16,7 +16,7 @@ class SupabaseService:
             raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in .env file")
 
         self.supabase: Client = create_client(supabase_url, supabase_key)
-        self.download_directory = Path("pdf")
+        self.download_directory = Path("../pdf")
 
         # Create pdf directory if it doesn't exist
         if not self.download_directory.exists():

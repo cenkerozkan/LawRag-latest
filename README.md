@@ -32,7 +32,11 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 - [x] Implement rag service logic
 - [x] Bring streamlit UI ||  FastAPI UI
 - [x] Add metadata filtering for FAISS queries.
+- [ ] Implement a supabase watcher as an independent component.
 - [ ] Implement a new UI with streamlit.
+- [ ] In RAG service, change the parameter of send message from chat model to uuid.
+- [ ] Move FAISS to base doc repository class.
+- [ ] For each document repository, create a method that inserts related docs with uuids.
 - [ ] Implement a generic repository for custom documents uploaded by the user.
   - [ ] Implement a file upload mechanism.
   - [ ] Use InMemoryVectorStore for custom user documents.
@@ -43,9 +47,6 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 - [ ] Bring more document repositories for different law areas to increase accuracy.
 - [ ] Increase the security in the prompt.
 - [ ] Create a word map for each law document to change the pdf selector examples
-- [ ] Refactor repository for not db but collections.
 - [ ] Add used_pdfs field in message model
 - [ ] Bring a more flexible solution in rag_service _pdf_selector.
-- [ ] Implement mini agents, starting with decider agent. 
 - [ ] Try vertex ai gecko multilingual embedding.
-- [ ] For each document repository, create a method that inserts related docs with uuids.

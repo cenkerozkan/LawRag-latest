@@ -14,6 +14,7 @@ class PdfSelector(metaclass=Singleton):
     def __init__(self):
         self._examples: list = [
             {"input": "İşçi hakları", "output": "is_isci_kanun"},
+            {"input": "İş yeri", "output": "is_isci_kanun"},
             {"input": "İş sözleşmesi", "output": "is_isci_kanun"},
             {"input": "Kıdem tazminatı", "output": "is_isci_kanun"},
             {"input": "İhbar tazminatı", "output": "is_isci_kanun"},

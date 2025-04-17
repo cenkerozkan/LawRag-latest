@@ -8,7 +8,7 @@ from service.rag_service import RagService
 from service.chat_thread_service import ChatThreadService
 from db.model.chat_thread_model import ChatThreadModel
 from dotenv import load_dotenv
-from util.supatest import SupabaseService
+from util.supabase_pdf_downloader import SupabaseService
 
 load_dotenv()
 

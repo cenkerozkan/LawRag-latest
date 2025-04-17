@@ -6,3 +6,7 @@ docrepo:
 	sed -i '' "s/{{ClassName}}/$$classname/g" $$filename; \
 	sed -i '' "s/{{name}}/$$name/g" $$filename; \
 	echo "✅ Created $$filename with class $$classname"
+
+git_count_lines:
+	echo "Counting lines of code in the git repository"
+	@git ls-files '*.py' | xargs wc -l

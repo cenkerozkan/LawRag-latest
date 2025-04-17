@@ -2,7 +2,7 @@ from typing import List
 
 class PromptGenerator:
     @staticmethod
-    def generate_prompt(rag_content: str, user_query: str) -> str:
+    def generate_main_prompt(rag_content: str, user_query: str) -> str:
         prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
                 <prompt>
                     <instruction>

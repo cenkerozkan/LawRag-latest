@@ -3,7 +3,9 @@ from pathlib import Path
 import asyncio
 from supabase import create_client, Client
 from dotenv import load_dotenv
+from util.logger import get_logger
 
+logger = get_logger(__name__)
 
 class SupabaseService:
     def __init__(self):
@@ -21,9 +23,9 @@ class SupabaseService:
         # Create pdf directory if it doesn't exist
         if not self.download_directory.exists():
             self.download_directory.mkdir()
-            print(f"Created directory: {self.download_directory}")
+            logger.info(f"Created directory: {self.download_directory}")
         else:
-            print(f"Using existing directory: {self.download_directory}")
+            logger.info(f"Using existing directory: {self.download_directory}")
 
     async def list_pdfs(self, bucket_name="kanunlar"):
         """
@@ -38,12 +40,12 @@ class SupabaseService:
         try:
             response = self.supabase.storage.from_(bucket_name).list()
             pdf_files = [file['name'] for file in response if file['name'].lower().endswith('.pdf')]
-            print(f"Found {len(pdf_files)} PDFs in bucket '{bucket_name}':")
+            logger.info(f"Found {len(pdf_files)} PDFs in bucket '{bucket_name}'")
             for pdf in pdf_files:
-                print(f"- {pdf}")
+                logger.info(f"- {pdf}")
             return pdf_files
         except Exception as e:
-            print(f"Error listing PDFs in bucket '{bucket_name}': {e}")
+            logger.error(f"Error listing PDFs in bucket '{bucket_name}': {e}")
             return []
 
     async def download_pdfs(self, bucket_name="kanunlar"):
@@ -61,7 +63,7 @@ class SupabaseService:
             pdf_files = await self.list_pdfs(bucket_name)
             downloaded_paths = []
 
-            print(f"\nDownloading {len(pdf_files)} PDFs from bucket '{bucket_name}'...")
+            logger.info(f"Downloading {len(pdf_files)} PDFs from bucket '{bucket_name}'...")
             for pdf_file in pdf_files:
                 local_path = self.download_directory / pdf_file
 
@@ -73,12 +75,12 @@ class SupabaseService:
                     f.write(file_data)
 
                 downloaded_paths.append(str(local_path))
-                print(f"Downloaded: {pdf_file} to {local_path}")
+                logger.info(f"Downloaded: {pdf_file} to {local_path}")
 
             return downloaded_paths
 
         except Exception as e:
-            print(f"Error downloading PDFs: {e}")
+            logger.error(f"Error downloading PDFs: {e}")
             return []
 
     async def download_pdf_by_name(self, file_name, bucket_name="kanunlar"):
@@ -102,11 +104,11 @@ class SupabaseService:
             with open(local_path, 'wb') as f:
                 f.write(file_data)
 
-            print(f"Downloaded: {file_name} to {local_path}")
+            logger.info(f"Downloaded: {file_name} to {local_path}")
             return str(local_path)
 
         except Exception as e:
-            print(f"Error downloading PDF {file_name}: {e}")
+            logger.error(f"Error downloading PDF {file_name}: {e}")
             return None
 
 
@@ -116,7 +118,7 @@ async def main():
 
     # List all PDFs in the bucket and download them all
     all_pdfs = await service.download_pdfs()
-    print(f"\nSuccessfully downloaded {len(all_pdfs)} PDFs to pdf directory")
+    logger.info(f"Successfully downloaded {len(all_pdfs)} PDFs to pdf directory")
 
 
 if __name__ == "__main__":

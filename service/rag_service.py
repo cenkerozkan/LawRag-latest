@@ -95,7 +95,7 @@ class RagService:
 
         # Retrieve the document content and generate a prompt
         document_content: str = await self._retrieve_document_content(query)
-        prompt: str = self._prompt_generator.generate_prompt(rag_content=document_content, user_query=query)
+        prompt: str = self._prompt_generator.generate_main_prompt(rag_content=document_content, user_query=query)
         response: any
         try:
             contents: list = [str({"role": msg.role, "content": msg.content}) for msg in chat_thread.history[-25:]]

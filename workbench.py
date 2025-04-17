@@ -75,24 +75,32 @@ CONTEXT REPOSITORY TEST
 """
 RAG SERVICE TEST
 """
-from service.rag_service import RagService
-import datetime
-import uuid
-from db.model.chat_thread_model import ChatThreadModel
-from repository.context_repository import ContextRepository
+#from service.rag_service import RagService
+#import datetime
+#import uuid
+#from db.model.chat_thread_model import ChatThreadModel
+#from repository.context_repository import ContextRepository
 
-context_repository = ContextRepository()
-new_chat = ChatThreadModel(
-    chat_id=str(uuid.uuid4()),
-    chat_name="Test",
-    created_at=datetime.datetime.now().isoformat(),
-    updated_at=datetime.datetime.now().isoformat(),
-    history=[]
-)
-asyncio.run(context_repository.insert_one(new_chat))
+#context_repository = ContextRepository()
+#new_chat = ChatThreadModel(
+#    chat_id=str(uuid.uuid4()),
+#    chat_name="Test",
+#    created_at=datetime.datetime.now().isoformat(),
+#    updated_at=datetime.datetime.now().isoformat(),
+#    history=[]
+#)
+#asyncio.run(context_repository.insert_one(new_chat))
 
-obj = RagService()
-while True:
-    result = asyncio.run(obj.send_message(query=input("Enter your question: "),
-                              chat_thread=new_chat))
-    print(result)
+#obj = RagService()
+#while True:
+#    result = asyncio.run(obj.send_message(query=input("Enter your question: "),
+#                              chat_thread=new_chat))
+#    print(result)
+
+
+"""
+GOOGLE SEARCH UTILITY TEST
+"""
+from util.google_search import google_search
+results: dict = asyncio.run(google_search("Kovulunca haklarım"))
+print(results)

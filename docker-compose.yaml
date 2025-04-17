@@ -12,5 +12,22 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hakmate-rag-api
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+    env_file:
+      - .env
+    volumes:
+      - ./pdf:/app/pdf
+      # Mount this if you want to develop without rebuilding:
+      # - .:/app
+
 volumes:
   mongodb_data:

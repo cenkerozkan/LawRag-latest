@@ -105,3 +105,10 @@ async def send_message(chat_id: str, message: MessageSend):
         raise HTTPException(status_code=404, detail="Chat not found")
     response = await rag_service.send_message(message.message, chat)
     return {"response": response}
+
+
+@app.get("/api/test/google_search_util/{query}")
+async def test_google_search_util(query: str):
+    from util.google_search import google_search
+    result = await google_search(query)
+    return {"result": result}

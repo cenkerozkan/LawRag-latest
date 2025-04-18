@@ -153,7 +153,56 @@ body {
     border-top: 1px solid #555;
 }
 
-.input-area input {
+.input-controls {
+    flex-grow: 1;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.web-search-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.web-search-toggle input[type="checkbox"] {
+    appearance: none;
+    width: 40px;
+    height: 20px;
+    background: #555;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+}
+
+.web-search-toggle input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    background: white;
+    transition: transform 0.2s;
+}
+
+.web-search-toggle input[type="checkbox"]:checked {
+    background: #0d6efd;
+}
+
+.web-search-toggle input[type="checkbox"]:checked::before {
+    transform: translateX(20px);
+}
+
+.toggle-label {
+    font-size: 14px;
+}
+
+.input-area input[type="text"] {
     flex-grow: 1;
     padding: 12px;
     background: #555;
@@ -215,7 +264,13 @@ body {
 
         <!-- Input Bar -->
         <div class="input-area">
-            <input id="messageInput" type="text" placeholder="Type a message...">
+            <div class="input-controls">
+                <input id="messageInput" type="text" placeholder="Type a message...">
+                <label class="web-search-toggle">
+                    <input type="checkbox" id="webSearchToggle">
+                    <span class="toggle-label">Web Search</span>
+                </label>
+            </div>
             <button id="sendButton">Send</button>
         </div>
     </div>
@@ -373,7 +428,6 @@ function addAssistantMessageWithStreaming(message) {
     streamText();
 }
 
-
 async function sendMessage() {
     if (!currentChatId) {
         alert("Please select or create a chat first!");
@@ -381,6 +435,7 @@ async function sendMessage() {
     }
 
     const messageInput = document.getElementById('messageInput');
+    const webSearchEnabled = document.getElementById('webSearchToggle').checked;
     const message = messageInput.value.trim();
     if (!message) return;
 
@@ -403,7 +458,11 @@ async function sendMessage() {
         const response = await fetch(`${API_BASE_URL}/api/chats/${currentChatId}/messages`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ message, chat_id: currentChatId })
+            body: JSON.stringify({
+                message,
+                chat_id: currentChatId,
+                web_search: webSearchEnabled
+            })
         });
 
         if (!response.ok) {
@@ -431,7 +490,6 @@ async function sendMessage() {
         document.getElementById('messageInput').disabled = false;
     }
 }
-
 
 document.getElementById('createChatButton').addEventListener('click', createChat);
 document.getElementById('sendButton').addEventListener('click', sendMessage);

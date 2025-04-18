@@ -1,4 +1,4 @@
-# 📌 Law-RAG Cheat Sheet
+# 📌 Law-RAG
 
 A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for message history – This project focuses on legal documents, allowing users to select relevant legal PDFs based on their input using semantic similarity and then generate responses accordingly.
 
@@ -13,8 +13,8 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 
 - **LLM Framework**: LangChain (for retrieval and generation)
 - **Embedding Models**: Google
-- **Vector Database**: FAISS
-- **LLM**: Google
+- **Vector Database**: FAISS, In Memory Vector Store
+- **LLM**: Gemini 2.0 Flash, Gemma3 4B
 - **Backend**: FastAPI, Python
 - **Database**: MongoDB (for message history)
 - **Storage**: Local File System
@@ -31,16 +31,47 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 - [x] Bring xml based instruction prompts
 - [x] Implement rag service logic
 - [x] Bring streamlit UI ||  FastAPI UI
+- [x] Add metadata filtering for FAISS queries.
+- [ ] Implement a supabase watcher as an independent component.
+- [ ] Implement a new UI with streamlit.
+- [ ] In RAG service, change the parameter of send message from chat model to uuid.
+- [ ] Move FAISS to base doc repository class.
+- [ ] For each document repository, create a method that inserts related docs with uuids.
+- [ ] Implement a generic repository for custom documents uploaded by the user.
+  - [ ] Implement a file upload mechanism.
+  - [ ] Use InMemoryVectorStore for custom user documents.
+- [ ] Bring a scaffolding mechanism for MongoDB repositories.
+- [x] Bring a scaffolding Mechanism for document repositories.
 - [ ] Implement a caching mechanism with redis for accessing chats
 - [ ] Use nltk to count tokens for each user message.
 - [ ] Bring more document repositories for different law areas to increase accuracy.
 - [ ] Increase the security in the prompt.
 - [ ] Create a word map for each law document to change the pdf selector examples
-- [ ] Refactor repository for not db but collections.
 - [ ] Add used_pdfs field in message model
 - [ ] Bring a more flexible solution in rag_service _pdf_selector.
-- [ ] Implement mini agents, starting with decider agent. 
 - [ ] Try vertex ai gecko multilingual embedding.
-- [ ] For each document repository, create a method that inserts related docs with uuids.
-- [ ] Move self._db to DocumentRepositoryBase.
-- [ ] Add metadata filtering for FAISS queries.
+
+## 🚀 How to Run
+
+### Prerequisites
+- MongoDB running locally
+- Python 3.8+
+
+### Installation & Setup
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/yourusername/law-rag.git
+   cd law-rag
+
+2. Install dependencies
+   ```bash
+   pip install -r requirements.txt
+   ```
+   
+3. Start FastAPI server
+   ```bash
+   uvicorn app:app --reload --port 8000 --host 0.0.0.0
+   ```
+
+4. Access the API at `http://localhost:8000/` for test UI.

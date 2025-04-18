@@ -1,21 +1,47 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-import asyncio
-from typing import List
 
 from service.rag_service import RagService
 from service.chat_thread_service import ChatThreadService
 from db.model.chat_thread_model import ChatThreadModel
-import os
 from dotenv import load_dotenv
+from util.supabase_pdf_downloader import SupabaseService
 
 load_dotenv()
-app = FastAPI()
-rag_service = RagService()
-chat_thread_service = ChatThreadService()
+
+# Global service variables
+rag_service: RagService = None
+chat_thread_service: ChatThreadService = None
+
+
+# Define lifespan context manager
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Initialize services after PDF download
+    global rag_service, chat_thread_service
+
+    print("Starting PDF download from Supabase...")
+    supabase_service = SupabaseService()
+    downloaded_pdfs = await supabase_service.download_pdfs()
+    print(f"Downloaded {len(downloaded_pdfs)} PDFs to pdf directory")
+
+    # Initialize services AFTER PDFs are downloaded
+    print("Initializing RAG and chat services...")
+    rag_service = RagService()
+    chat_thread_service = ChatThreadService()
+    print("Application startup complete!")
+
+    yield
+
+    # Shutdown: Add cleanup logic here if needed
+    print("Application shutting down...")
+
+
+# Create FastAPI app with lifespan
+app = FastAPI(lifespan=lifespan)
 
 # Enable CORS
 app.add_middleware(
@@ -26,17 +52,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Models for request/response
 class ChatCreate(BaseModel):
     chat_name: str
 
+
 class MessageSend(BaseModel):
     message: str
     chat_id: str
+    web_search: bool
+
 
 @app.get("/")
 async def read_root():
     return FileResponse("./index.html")
+
 
 @app.post("/api/chats")
 async def create_chat(chat: ChatCreate):
@@ -45,10 +76,12 @@ async def create_chat(chat: ChatCreate):
         raise HTTPException(status_code=400, detail="Failed to create chat")
     return result
 
+
 @app.get("/api/chats")
 async def get_chats():
     result: list[ChatThreadModel] = await chat_thread_service.retrieve_all_chat_threads()
     return result
+
 
 @app.get("/api/chats/{chat_id}")
 async def get_chat(chat_id: str):
@@ -57,6 +90,7 @@ async def get_chat(chat_id: str):
         raise HTTPException(status_code=404, detail="Chat not found")
     return chat
 
+
 @app.delete("/api/chats/{chat_id}")
 async def delete_chat(chat_id: str):
     success = await chat_thread_service.delete_chat_thread(chat_id)
@@ -64,10 +98,18 @@ async def delete_chat(chat_id: str):
         raise HTTPException(status_code=404, detail="Chat not found")
     return {"success": True}
 
+
 @app.post("/api/chats/{chat_id}/messages")
 async def send_message(chat_id: str, message: MessageSend):
     chat = await chat_thread_service.retrieve_chat_thread(chat_id)
     if not chat:
         raise HTTPException(status_code=404, detail="Chat not found")
-    response = await rag_service.send_message(message.message, chat)
+    response = await rag_service.send_message(message.message, chat, message.web_search)
     return {"response": response}
+
+
+@app.get("/api/test/google_search_util/{query}")
+async def test_google_search_util(query: str):
+    from util.google_search import google_search
+    result = await google_search(query)
+    return {"result": result}

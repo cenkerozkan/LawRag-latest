@@ -61,6 +61,7 @@ class ChatCreate(BaseModel):
 class MessageSend(BaseModel):
     message: str
     chat_id: str
+    web_search: bool
 
 
 @app.get("/")
@@ -103,7 +104,7 @@ async def send_message(chat_id: str, message: MessageSend):
     chat = await chat_thread_service.retrieve_chat_thread(chat_id)
     if not chat:
         raise HTTPException(status_code=404, detail="Chat not found")
-    response = await rag_service.send_message(message.message, chat)
+    response = await rag_service.send_message(message.message, chat, message.web_search)
     return {"response": response}
 
 

@@ -1,9 +1,14 @@
-import aiohttp
 import asyncio
+import io
 import time
 import os
+
+import aiohttp
+import pdfplumber
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
+
+
 from util.logger import get_logger
 
 load_dotenv()
@@ -19,7 +24,6 @@ logger = get_logger(__name__)
 
 
 async def fetch_data(session, url):
-    logger.info(f"Starting task: {url}")
     async with session.get(url) as response:
         data = await response.json()
         logger.info(f"Got data: {data}")
@@ -48,9 +52,36 @@ async def fetch_single_page(session, url):
     try:
         async with session.get(url) as response:
             if response.status == 200:
-                raw_html = await response.text()
+                content_type = response.headers.get('Content-Type', '').lower()
+
+                if 'application/pdf' in content_type:
+                    # Handle PDF content
+                    pdf_bytes = await response.read()
+                    try:
+                        with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+                            text = ' '.join(page.extract_text() or '' for page in pdf.pages)
+                            return {"page_url": url, "content": text, "role": "Google Search"}
+                    except Exception as pdf_error:
+                        logger.error(f"Error extracting PDF content from {url}: {str(pdf_error)}")
+                        return None
+
+                # Handle regular HTML content
+                try:
+                    raw_html = await response.text()
+                except UnicodeDecodeError:
+                    raw_bytes = await response.read()
+                    for encoding in ['utf-8', 'iso-8859-1', 'windows-1252', 'latin1']:
+                        try:
+                            raw_html = raw_bytes.decode(encoding)
+                            break
+                        except UnicodeDecodeError:
+                            continue
+                    else:
+                        logger.warning(f"Could not decode content from {url}")
+                        return None
+
                 cleaned_text = clean_html(raw_html)
-                return {"page_url": url, "content": cleaned_text}
+                return {"page_url": url, "content": cleaned_text, "role": "Google Search"}
             else:
                 logger.error(f"Error fetching URL {url}: {response.status}")
                 return None
@@ -61,7 +92,7 @@ async def fetch_single_page(session, url):
 
 async def fetch_page_content(list_of_urls: list) -> list:
     """Fetch content from multiple URLs concurrently"""
-    connector = aiohttp.TCPConnector(limit_per_host=5)
+    connector = aiohttp.TCPConnector(limit_per_host=20)
     connector._max_header_field_size = 32768  # Increase header size
 
     async with aiohttp.ClientSession(connector=connector) as session:
@@ -73,6 +104,8 @@ async def google_search(search_query: str):
     base_url = f"https://www.googleapis.com/customsearch/v1?key={os.getenv('GOOGLE_CUSTOM_SEARCH_API')}&cx={os.getenv('GOOGLE_CUSTOM_SEARCH_ENGINE_ID')}"
     query_result: dict
     final_result: list[dict]
+
+    logger.info(f"Search query: {search_query}")
 
     async with aiohttp.ClientSession() as session:
         query_result = await fetch_data(session, base_url + f"&q={search_query}")

@@ -21,23 +21,23 @@ class WebSearchAgent:
             self,
             query: str,
             conversation_history: list[dict[str, str]],
-    ) -> list[dict[str, str]] | None:
+    ) -> list[dict[str, str]]:
         prompt: str = PromptGenerator.generate_web_search_prompt(query, conversation_history)
-        response: str
+        response: any
         results: list[dict[str, str]] = []
 
         try:
-            response = await self._gemini_client.models.generate_content(
+            response = self._gemini_client.models.generate_content(
                 model="gemini-2.0-flash",
                 contents=prompt,
             )
             self._logger.info(f"Web search query by Agent: {query}")
         except Exception as e:
             self._logger.error(f"Error generating web search content: {e}")
-            return {}
+            return []
 
-        _ = await google_search(response)
-        results.extend(_)
+        _ = await google_search(response.text)
+        results = [result for result in _]
         return results
 
 web_search_agent = WebSearchAgent()

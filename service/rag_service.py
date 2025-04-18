@@ -13,6 +13,7 @@ from util.pdf_selector import PdfSelector
 from util.logger import get_logger
 from util.uuid_generator import uuid_generator
 from util.prompt_generator import PromptGenerator
+from agents.web_search_agent import WebSearchAgent
 
 from starlette.concurrency import run_in_threadpool
 from google import genai
@@ -24,6 +25,7 @@ class RagService:
 
         try:
             self._gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+            self._web_search_agent = WebSearchAgent()
             self._pdf_selector = PdfSelector()
             self._context_repository = ContextRepository()
             self._worker_laws_repository = WorkerLawsDocumentRepository(file_path="./pdf/is_isci_kanun.pdf")
@@ -82,7 +84,8 @@ class RagService:
     async def send_message(
             self,
             query: str,
-            chat_thread: ChatThreadModel
+            chat_thread: ChatThreadModel,
+            web_search: bool
     ) -> str:
         # Create a new message model and append it to the chat thread
         message_model: MessageModel = MessageModel(
@@ -97,8 +100,17 @@ class RagService:
         document_content: str = await self._retrieve_document_content(query)
         prompt: str = self._prompt_generator.generate_main_prompt(rag_content=document_content, user_query=query)
         response: any
+        contents: list = [str({"role": msg.role, "content": msg.content}) for msg in chat_thread.history[-25:]]
+        web_search_result: list[dict[str,str]]
+
+        # Call web search agent
+        if web_search:
+            self._logger.info(f"Web search started for query: {query}")
+            web_search_result = await self._web_search_agent.search_web(query, contents)
+            for result in web_search_result:
+                contents.append(str(result))
+
         try:
-            contents: list = [str({"role": msg.role, "content": msg.content}) for msg in chat_thread.history[-25:]]
             contents.append(prompt)
             #self._logger.info(f"Contents: {contents}")
             response = self._gemini_client.models.generate_content(

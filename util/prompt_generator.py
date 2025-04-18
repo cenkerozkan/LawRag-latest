@@ -24,3 +24,24 @@ class PromptGenerator:
                     </userquery>
                 </prompt>"""
         return prompt
+
+    @staticmethod
+    def generate_web_search_prompt(query: str, conversation_history: List[dict]) -> str:
+        prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
+                    <prompt>
+                        <instruction>
+                            Sen hukuk alanında araştırma yapmak ile görevli bir web ajanısın.
+                            - Öncelikle konuşma geçmişi ve kullanıcı sorgusunu değerlendirerek konunun hukuk ile alakalı olup olmadığını kontrol et
+                            - Eğer konu hukuk ile alakalı değilse, sadece "false" olarak cevap ver
+                            - Eğer konu hukuk ile alakalıysa, web araması için Türkçe ve alakalı bir arama sorgusu oluştur
+                            - Arama sorgusunu oluştururken konuşma geçmişini ve mevcut sorguyu göz önünde bulundur
+                            - Yanıtını düz metin formatında ver, XML formatında değil
+                        </instruction>
+                        <conversation>
+                            {conversation_history}
+                        </conversation>
+                        <userquery>
+                            {query}
+                        </userquery>
+                    </prompt>"""
+        return prompt

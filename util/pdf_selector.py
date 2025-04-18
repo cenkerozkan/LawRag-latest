@@ -13,7 +13,9 @@ from util.logger import get_logger
 class PdfSelector(metaclass=Singleton):
     def __init__(self):
         self._examples: list = [
+            # İŞÇİ KANUNU
             {"input": "İşçi hakları", "output": "is_isci_kanun"},
+            {"input": "Kovulmak", "output": "is_isci_kanun"},
             {"input": "İş yeri", "output": "is_isci_kanun"},
             {"input": "İş sözleşmesi", "output": "is_isci_kanun"},
             {"input": "Kıdem tazminatı", "output": "is_isci_kanun"},
@@ -24,6 +26,8 @@ class PdfSelector(metaclass=Singleton):
             {"input": "İş kazası tazminatı", "output": "is_isci_kanun"},
             {"input": "Yıllık izin hakkı", "output": "is_isci_kanun"},
             {"input": "Asgari ücret", "output": "is_isci_kanun"},
+
+            # BORÇLAR KANUNU
             {"input": "Borçlar hukuku", "output": "borclar_kanun"},
             {"input": "Müteselsil borç", "output": "borclar_kanun"},
             {"input": "Sözleşmeden doğan borçlar", "output": "borclar_kanun"},

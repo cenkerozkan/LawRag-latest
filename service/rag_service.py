@@ -31,7 +31,7 @@ class RagService:
             self._context_repository = ContextRepository()
             self._worker_laws_repository = WorkerLawsDocumentRepository(file_path="./pdf/is_isci_kanun.pdf")
             self._obligations_laws_repository = ObligationsLawsDocumentRepository(file_path="./pdf/borclar_kanun.pdf")
-            self._industrial_property_laws_repository = IndustrialPropertyLawsDocumentRepository(file_path="./pdf/sinai_mulkiyet_kanunu.pdf")
+            self._industrial_property_laws_repository = IndustrialPropertyLawsDocumentRepository(file_path="./pdf/sinai_mulkiyet_kanun.pdf")
         except Exception as e:
             self._logger.error(f"Error initializing RagService: {e}")
 

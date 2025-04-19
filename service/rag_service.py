@@ -8,6 +8,7 @@ from db.model.message_model import MessageModel
 from meta.singleton import Singleton
 from repository.worker_laws_document_repository import WorkerLawsDocumentRepository
 from repository.obligations_laws_document_repository import ObligationsLawsDocumentRepository
+from repository.industrial_property_laws_document_repository import IndustrialPropertyLawsDocumentRepository
 from repository.context_repository import ContextRepository
 from util.pdf_selector import PdfSelector
 from util.logger import get_logger
@@ -30,6 +31,7 @@ class RagService:
             self._context_repository = ContextRepository()
             self._worker_laws_repository = WorkerLawsDocumentRepository(file_path="./pdf/is_isci_kanun.pdf")
             self._obligations_laws_repository = ObligationsLawsDocumentRepository(file_path="./pdf/borclar_kanun.pdf")
+            self._industrial_property_laws_repository = IndustrialPropertyLawsDocumentRepository(file_path="./pdf/sinai_mulkiyet_kanunu.pdf")
         except Exception as e:
             self._logger.error(f"Error initializing RagService: {e}")
 
@@ -62,6 +64,12 @@ class RagService:
                     obligations_laws_result = await self._obligations_laws_repository.aretrieve(query)
                     self._logger.info(f"Obligations laws result result: {obligations_laws_result}")
                     result += obligations_laws_result
+
+                elif pdf == "sinai_mulkiyet_kanun":
+                    industrial_property_laws_result = await self._industrial_property_laws_repository.aretrieve(query)
+                    self._logger.info(f"Industrial property laws result result: {industrial_property_laws_result}")
+                    result += industrial_property_laws_result
+
 
         except Exception as e:
             self._logger.error(f"Error retrieving rag: {e}")

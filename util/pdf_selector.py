@@ -37,7 +37,21 @@ class PdfSelector(metaclass=Singleton):
             {"input": "Kira artışı", "output": "borclar_kanun"},
             {"input": "Borçlu ve alacaklı hakları", "output": "borclar_kanun"},
             {"input": "Tazminat yükümlülükleri", "output": "borclar_kanun"},
-            {"input": "Sorumluluk halleri", "output": "borclar_kanun"}
+            {"input": "Sorumluluk halleri", "output": "borclar_kanun"},
+
+            # SİNAİ MÜLKİYET KANUNU
+            {"input": "Marka tescili", "output": "sinai_mulkiyet_kanun"},
+            {"input": "Patent başvurusu", "output": "sinai_mulkiyet_kanun"},
+            {"input": "Faydalı model", "output": "sinai_mulkiyet_kanun"},
+            {"input": "Endüstriyel tasarım", "output": "sinai_mulkiyet_kanun"},
+            {"input": "Coğrafi işaret", "output": "sinai_mulkiyet_kanun"},
+            {"input": "Marka hakkı", "output": "sinai_mulkiyet_kanun"},
+            {"input": "Patent koruması", "output": "sinai_mulkiyet_kanun"},
+            {"input": "Tasarım tescili", "output": "sinai_mulkiyet_kanun"},
+            {"input": "Marka ihlali", "output": "sinai_mulkiyet_kanun"},
+            {"input": "Patent ihlali", "output": "sinai_mulkiyet_kanun"},
+            {"input": "Lisans sözleşmesi", "output": "sinai_mulkiyet_kanun"},
+            {"input": "Teknoloji transferi", "output": "sinai_mulkiyet_kanun"},
         ]
         self._logger = get_logger(__name__)
         self._example_selector = SemanticSimilarityExampleSelector.from_examples(

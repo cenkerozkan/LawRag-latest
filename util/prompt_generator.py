@@ -35,7 +35,7 @@ class PromptGenerator:
                             - Eğer konu hukuk ile alakalı değilse, sadece "false" olarak cevap ver
                             - Eğer konu hukuk ile alakalıysa, web araması için Türkçe ve alakalı bir arama sorgusu oluştur
                             - Arama sorgusunu oluştururken konuşma geçmişini ve mevcut sorguyu göz önünde bulundur
-                            - Yanıtını düz metin formatında ver, XML formatında değil
+                            - Yanıtını düz metin formatında ver, XML formatında değil, Ve soru hukuk ile alakasız ise "false" dönmeyi unutma.
                         </instruction>
                         <conversation>
                             {conversation_history}

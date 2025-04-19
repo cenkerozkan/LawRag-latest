@@ -31,12 +31,16 @@ class WebSearchAgent:
                 model="gemini-2.0-flash",
                 contents=prompt,
             )
-            self._logger.info(f"Web search query by Agent: {query}")
+            self._logger.info(f"Web search query by Agent: {response.text}")
         except Exception as e:
             self._logger.error(f"Error generating web search content: {e}")
             return []
 
-        _ = await google_search(response.text)
+        if response.text == "false":
+            self._logger.error(f"Web search query by Agent returned false: {query}")
+            return []
+
+        _ = await google_search(response.text.strip())
         results = [result for result in _]
         return results
 

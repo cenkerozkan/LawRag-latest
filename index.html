@@ -278,7 +278,7 @@ body {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js"></script>
 <script>
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = "https://ad3a-46-154-228-237.ngrok-free.app";
 let currentChatId = null;
 const md = window.markdownit();
 
@@ -408,19 +408,22 @@ function addAssistantMessageWithStreaming(message) {
     chatMessages.appendChild(messageDiv);
 
     const messageText = typeof message === 'string' ? message : JSON.stringify(message);
-    let words = messageText.split(" "); // Split by words
+    const words = messageText.split(" ");
     let i = 0;
-    let tempText = ""; // Temporary text holder
+    let tempText = "";
+    const wordsPerChunk = 4;
 
     function streamText() {
         if (i < words.length) {
-            tempText += (i === 0 ? "" : " ") + words[i]; // Append word with space
-            messageDiv.innerHTML = md.render(tempText + " ▌"); // Render Markdown + cursor effect
-            i++;
+            // Get next chunk of words (up to 4)
+            const chunk = words.slice(i, i + wordsPerChunk);
+            tempText += (i === 0 ? "" : " ") + chunk.join(" ");
+            messageDiv.innerHTML = md.render(tempText + " ▌");
+            i += wordsPerChunk;
             scrollToBottom();
-            setTimeout(streamText, 100); // Adjust speed here
+            setTimeout(streamText, 100);
         } else {
-            messageDiv.innerHTML = md.render(tempText); // Final render without cursor
+            messageDiv.innerHTML = md.render(tempText);
             scrollToBottom();
         }
     }
@@ -430,8 +433,33 @@ function addAssistantMessageWithStreaming(message) {
 
 async function sendMessage() {
     if (!currentChatId) {
-        alert("Please select or create a chat first!");
-        return;
+        // Create a random chat name
+        const randomName = `Chat ${new Date().toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })}`;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/chats`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_name: randomName })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to create chat: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            await loadChats();
+            currentChatId = result.chat_id;
+        } catch (error) {
+            console.error("Error creating chat:", error);
+            alert("Error creating chat. Please try again.");
+            return;
+        }
     }
 
     const messageInput = document.getElementById('messageInput');
@@ -447,7 +475,6 @@ async function sendMessage() {
         sendButton.disabled = true;
         messageInput.disabled = true;
 
-        // Add a "thinking" message
         const chatMessages = document.getElementById('chatMessages');
         const thinkingDiv = document.createElement('div');
         thinkingDiv.className = 'message assistant-message';
@@ -470,11 +497,10 @@ async function sendMessage() {
         }
 
         const result = await response.json();
-        chatMessages.removeChild(thinkingDiv); // Remove "thinking" message
+        chatMessages.removeChild(thinkingDiv);
 
         if (result) {
             const assistantMessage = result.assistant_message || result.response || result.message;
-
             if (assistantMessage) {
                 addAssistantMessageWithStreaming(assistantMessage);
             } else {

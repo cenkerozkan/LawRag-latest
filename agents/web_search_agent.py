@@ -24,7 +24,7 @@ class WebSearchAgent:
     ) -> list[dict[str, str]]:
         prompt: str = PromptGenerator.generate_web_search_prompt(query, conversation_history)
         response: any
-        results: list[dict[str, str]] = []
+        results: list[dict[str, str]]
 
         try:
             response = self._gemini_client.models.generate_content(
@@ -36,7 +36,7 @@ class WebSearchAgent:
             self._logger.error(f"Error generating web search content: {e}")
             return []
 
-        if response.text == "false":
+        if response.text.strip() == "false":
             self._logger.error(f"Web search query by Agent returned false: {query}")
             return []
 

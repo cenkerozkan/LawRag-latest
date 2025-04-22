@@ -28,4 +28,4 @@ class {{ClassName}}(DocumentRepositoryBase):
     async def aretrieve(self, query: str) -> str:
         self._logger.info(f"Retrieving documents for query: {query}")
         docs = await self._db.asimilarity_search(query=query, filter={"source": {"$eq": self.__class__.__name__}})
-        return str("{{ClassName}} RAG Context\n----" + docs[0].page_content + docs[1].page_content + docs[2].page_content)
+        return str("{{ClassName}} RAG Context\n" + docs[0].page_content + docs[1].page_content + docs[2].page_content)

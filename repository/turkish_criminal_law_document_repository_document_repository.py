@@ -1,29 +1,47 @@
 import os
+import uuid
 from util.logger import get_logger
 from base.document_repository_base import DocumentRepositoryBase
+from config.config import CHUNK_SIZE
 from langchain_community.vectorstores import FAISS
 from langchain_cohere.embeddings import CohereEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-class TurkishCriminalLawDocumentRepositoryDocumentRepository(DocumentRepositoryBase):
-    __slots__ = ('_loader', '_documents', '_logger')
+# industrial_property_laws_document_repository.py
+class TurkishCriminalLawDocumentRepository(DocumentRepositoryBase):
     def __init__(self, file_path: str):
         super().__init__()
+        self._ids: list = []
         self._logger = get_logger(__name__)
-        self._logger.info(f"Initializing turkish_criminal_law_document_repository Document Repository")
+        self._logger.info(f"Initializing IndustrialPropertyLaws Document Repository")
 
         self._logger.info(f"Loading documents from file: {file_path}")
         self._loader = PyPDFLoader(file_path)
-        self._documents = (RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=100)
+        self._documents = (RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=100)
                            .split_documents(self._loader.load()))
         for doc in self._documents:
             doc.metadata["source"] = self.__class__.__name__
-        self._db = FAISS.from_documents(
-            self._documents,
-            CohereEmbeddings(model=self._model)
-        )
+
+    def delete_documents(self) -> bool:
+        try:
+            DocumentRepositoryBase._db.delete(ids=[self._ids[-1]])
+            self._ids = []
+        except Exception as e:
+            DocumentRepositoryBase._logger.error(f"Error during deletion {e}")
+            return False
+        return True
+
+    def init_documents(self) -> bool:
+        self._ids: list[str] = [str(uuid.uuid4()) for _ in range(len(self._documents))]
+        try:
+            self._logger.info(f"Initializing {self.__class__.__name__} documents")
+            DocumentRepositoryBase._db.add_documents(documents=self._documents, ids=self._ids)
+        except Exception as e:
+            DocumentRepositoryBase._logger.error(f"Error during initialization {e}")
+            return False
+        return True
 
     async def aretrieve(self, query: str) -> str:
         self._logger.info(f"Retrieving documents for query: {query}")

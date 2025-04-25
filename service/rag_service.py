@@ -29,9 +29,16 @@ class RagService:
             self._web_search_agent = WebSearchAgent()
             self._pdf_selector = PdfSelector()
             self._context_repository = ContextRepository()
+
+            # Document repositories injection.
             self._worker_laws_repository = WorkerLawsDocumentRepository(file_path="./pdf/is_isci_kanun.pdf")
             self._obligations_laws_repository = ObligationsLawsDocumentRepository(file_path="./pdf/borclar_kanun.pdf")
             self._industrial_property_laws_repository = IndustrialPropertyLawsDocumentRepository(file_path="./pdf/sinai_mulkiyet_kanun.pdf")
+
+            # Initialize the document repositories.
+            self._worker_laws_repository.init_documents()
+            self._obligations_laws_repository.init_documents()
+            self._industrial_property_laws_repository.init_documents()
         except Exception as e:
             self._logger.error(f"Error initializing RagService: {e}")
 
@@ -107,18 +114,22 @@ class RagService:
         # Retrieve the document content and generate a prompt
         document_content: str = await self._retrieve_document_content(query)
         prompt: str = self._prompt_generator.generate_main_prompt(rag_content=document_content, user_query=query)
-        response: any
-        contents: list = [str({"role": msg.role, "content": msg.content}) for msg in chat_thread.history[-25:]]
+        # Contents will be used as context.
+        contents: list = [str({"role": msg.role, "content": msg.content}) for msg in chat_thread.history[-200:]]
         web_search_result: list[dict[str,str]]
+        # Gemini response.
+        response: any
 
         # Call web search agent
         if web_search:
             self._logger.info(f"Web search started for query: {query}")
             web_search_result = await self._web_search_agent.search_web(query, contents)
             for result in web_search_result:
+                # Add web search results to the contents.
                 contents.append(str(result))
 
         try:
+            # Send message to the gemini.
             contents.append(prompt)
             #self._logger.info(f"Contents: {contents}")
             response = self._gemini_client.models.generate_content(

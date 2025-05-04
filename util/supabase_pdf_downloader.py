@@ -7,7 +7,7 @@ from util.logger import get_logger
 
 logger = get_logger(__name__)
 
-class SupabaseService:
+class SupabasePdfDownloader:
     def __init__(self):
         """Initialize Supabase client with credentials from environment variables"""
         load_dotenv()
@@ -111,15 +111,9 @@ class SupabaseService:
             logger.error(f"Error downloading PDF {file_name}: {e}")
             return None
 
-
-# Example usage
-async def main():
-    service = SupabaseService()
-
-    # List all PDFs in the bucket and download them all
-    all_pdfs = await service.download_pdfs()
-    logger.info(f"Successfully downloaded {len(all_pdfs)} PDFs to pdf directory")
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    async def run(self):
+        """
+        Run the PDF downloader
+        """
+        await self.list_pdfs()
+        await self.download_pdfs()

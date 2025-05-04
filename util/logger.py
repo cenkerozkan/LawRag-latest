@@ -23,12 +23,13 @@ def get_logger(name):
             return super().format(record)
 
     logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
 
-    formatter = ColoredFormatter('%(levelname)s - %(asctime)s - %(filename)s:%(lineno)d - %(name)s - %(message)s')
-
-    ch = logging.StreamHandler()
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
+    # Only add handlers if the logger doesn't have any yet
+    if not logger.handlers:
+        logger.setLevel(logging.DEBUG)
+        formatter = ColoredFormatter('%(levelname)s - %(asctime)s - %(filename)s:%(lineno)d - %(name)s - %(message)s')
+        ch = logging.StreamHandler()
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
 
     return logger

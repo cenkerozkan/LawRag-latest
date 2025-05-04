@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 from google import genai
 from util.logger import get_logger
-from util.prompt_generator import PromptGenerator
+from util.prompt_generator import prompt_generator
 from util.google_search import google_search
 
 load_dotenv()
@@ -22,7 +22,7 @@ class WebSearchAgent:
             query: str,
             conversation_history: list[dict[str, str]],
     ) -> list[dict[str, str]]:
-        prompt: str = PromptGenerator.generate_web_search_prompt(query, conversation_history)
+        prompt: str = prompt_generator.generate_web_search_prompt(query, conversation_history)
         response: any
         results: list[dict[str, str]]
 

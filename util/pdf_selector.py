@@ -52,6 +52,33 @@ class PdfSelector(metaclass=Singleton):
             {"input": "Patent ihlali", "output": "sinai_mulkiyet_kanun"},
             {"input": "Lisans sözleşmesi", "output": "sinai_mulkiyet_kanun"},
             {"input": "Teknoloji transferi", "output": "sinai_mulkiyet_kanun"},
+
+            # TÜRK CEZA KANUNU
+            {"input": "Kasten adam öldürme", "output": "turk_ceza_kanun"},
+            {"input": "Kasten yaralama", "output": "turk_ceza_kanun"},
+            {"input": "Taksirle yaralama", "output": "turk_ceza_kanun"},
+            {"input": "Cinsel saldırı", "output": "turk_ceza_kanun"},
+            {"input": "Çocuk istismarı", "output": "turk_ceza_kanun"},
+            {"input": "Yağma suçu", "output": "turk_ceza_kanun"},
+            {"input": "Hırsızlık", "output": "turk_ceza_kanun"},
+            {"input": "Dolandırıcılık", "output": "turk_ceza_kanun"},
+            {"input": "Güveni kötüye kullanma", "output": "turk_ceza_kanun"},
+            {"input": "Tehdit suçu", "output": "turk_ceza_kanun"},
+            {"input": "Hakaret suçu", "output": "turk_ceza_kanun"},
+            {"input": "Resmi belgede sahtecilik", "output": "turk_ceza_kanun"},
+            {"input": "Uyuşturucu madde suçu", "output": "turk_ceza_kanun"},
+            {"input": "Zimmet", "output": "turk_ceza_kanun"},
+            {"input": "Rüşvet", "output": "turk_ceza_kanun"},
+            {"input": "İftira", "output": "turk_ceza_kanun"},
+            {"input": "Yalan tanıklık", "output": "turk_ceza_kanun"},
+            {"input": "Kamu görevlisine hakaret", "output": "turk_ceza_kanun"},
+            {"input": "Suç işlemek amacıyla örgüt kurma", "output": "turk_ceza_kanun"},
+            {"input": "Terör suçu", "output": "turk_ceza_kanun"},
+            {"input": "Ceza ehliyeti", "output": "turk_ceza_kanun"},
+            {"input": "Meşru müdafaa", "output": "turk_ceza_kanun"},
+            {"input": "Haksız tahrik", "output": "turk_ceza_kanun"},
+            {"input": "Zorunluluk hali", "output": "turk_ceza_kanun"},
+            {"input": "Ceza indirimi", "output": "turk_ceza_kanun"},
         ]
         self._logger = get_logger(__name__)
         self._example_selector = SemanticSimilarityExampleSelector.from_examples(

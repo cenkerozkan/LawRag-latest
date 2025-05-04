@@ -50,3 +50,38 @@ class PromptGenerator:
                         </userquery>
                     </prompt>"""
         return prompt
+
+    @staticmethod
+    def generate_hyde_rag_search_prompt(query: str, conversation_history: List[dict], selected_pdfs: List[str]) -> str:
+        # Seçilen PDF'leri XML formatına uygun hale getir
+        selected_pdfs_str = "\n".join([f"<pdf>{pdf_name}</pdf>" for pdf_name in selected_pdfs])
+
+        prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
+                    <prompt>
+                        <instruction>
+                            Bu görev, HyDE RAG (Hypothetical Document Embeddings for Retrieval-Augmented Generation) yaklaşımına göre çalışır.
+                            Amacın, kullanıcının sorduğu hukuki soruya karşılık olarak, embedding işleminde kullanılacak bağlamsal ve teknik bir açıklama üretmektir.
+
+                            - Üreteceğin açıklama, kullanıcının kastettiği hukuki sorunun özetini ve teknik içeriğini temsil etmelidir.
+                            - Bu açıklama sayesinde sistem, daha isabetli hukuki içeriklere erişecektir.
+                            - Kullanıcının ilgilendiği kanunlar listelenmiştir. Yalnızca bu belgeler çerçevesinde içerik üret.
+                            - Eğer kullanıcı sorgusu hukukla doğrudan ilgili değilse, yalnızca "false" cevabını dön.
+                            - Eğer sorgu belirtilen belgelerle alakasızsa, yine sadece "false" cevabını dön.
+                            - Açıklama 3-5 cümleyi geçmemeli, teknik ama sade bir hukuk dili kullanılmalı ve kullanıcıya hitap eden ifadelerden kaçınılmalıdır.
+                            - Cevabın embedding'e uygun, bilgi yoğun ve özgün olmalıdır.
+
+                        </instruction>
+                        <selectedpdfs>
+                            {selected_pdfs_str}
+                        </selectedpdfs>
+                        <conversation>
+                            {conversation_history}
+                        </conversation>
+                        <userquery>
+                            {query}
+                        </userquery>
+                    </prompt>"""
+        return prompt
+
+
+prompt_generator = PromptGenerator()

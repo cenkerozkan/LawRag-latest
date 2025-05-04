@@ -75,3 +75,430 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
    ```
 
 4. Access the API at `http://localhost:8000/` for test UI.
+
+
+
+## 📚 API Documentation
+
+### Authorization
+
+All endpoints require Bearer token authentication:
+
+```http
+Authorization: Bearer <token>
+```
+
+---
+
+## Global Error Handling
+
+The API implements global exception handling for HTTP errors. All error responses follow the `ResponseModel` format:
+
+| Status Code | Message                |
+| ----------- | ---------------------- |
+| 404         | Not found              |
+| 401         | Unauthorized           |
+| 403         | Not authenticated      |
+| 500         | Internal server error  |
+
+**Example Error Response:**
+```json
+{
+  "success": false,
+  "message": "Not found",
+  "data": {},
+  "error": ""
+}
+```
+
+Other HTTP errors will return the original error message in the `message` field.
+
+---
+
+## Endpoints
+
+### Chat Thread Endpoints
+
+#### Create Chat Thread
+
+`POST /chat_service/create`
+
+**Request Body:**
+```json
+{
+  "chat_name": "string",
+  "user_id": "string",
+  "anonymous_user_id": "string (optional)"
+}
+```
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Chat thread created successfully",
+  "data": {
+    "chat": {
+      "chat_name": "string",
+      "chat_id": "string",
+      "user_id": "string",
+      "anonymous_user_id": "string",
+      "created_at": "datetime",
+      "updated_at": "datetime",
+      "history": []
+    }
+  },
+  "error": ""
+}
+```
+
+**Error Responses:**
+- 400: Invalid request
+```json
+{
+  "success": false,
+  "message": "Invalid request parameters",
+  "data": {},
+  "error": "BAD_REQUEST"
+}
+```
+- 401: Unauthorized
+```json
+{
+  "success": false,
+  "message": "Unauthorized",
+  "data": {},
+  "error": "UNAUTHORIZED"
+}
+```
+- 500: Internal server error
+```json
+{
+  "success": false,
+  "message": "Internal server error",
+  "data": {},
+  "error": "INTERNAL_ERROR"
+}
+```
+
+---
+
+#### Delete Chat Thread
+
+`DELETE /chat_service/delete/{chat_id}`
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Chat thread deleted successfully.",
+  "data": {},
+  "error": ""
+}
+```
+
+**Error Responses:**
+- 404: Not found
+```json
+{
+  "success": false,
+  "message": "Chat thread not found.",
+  "data": {},
+  "error": "NOT_FOUND"
+}
+```
+- 401: Unauthorized
+```json
+{
+  "success": false,
+  "message": "Unauthorized",
+  "data": {},
+  "error": "UNAUTHORIZED"
+}
+```
+- 500: Internal server error
+```json
+{
+  "success": false,
+  "message": "Internal server error",
+  "data": {},
+  "error": "INTERNAL_ERROR"
+}
+```
+
+---
+
+#### Get All Chat Threads
+
+`GET /chat_service/get_all_chat_threads/{user_id}`
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Chat threads retrieved successfully.",
+  "data": {
+    "threads": [
+      {
+        "chat_name": "string",
+        "chat_id": "string",
+        "user_id": "string",
+        "anonymous_user_id": "string",
+        "created_at": "datetime",
+        "updated_at": "datetime",
+        "history": []
+      }
+    ]
+  },
+  "error": ""
+}
+```
+
+**Error Responses:**
+- 404: Not found
+```json
+{
+  "success": false,
+  "message": "No chat threads found for user.",
+  "data": {},
+  "error": "NOT_FOUND"
+}
+```
+- 401: Unauthorized
+```json
+{
+  "success": false,
+  "message": "Unauthorized",
+  "data": {},
+  "error": "UNAUTHORIZED"
+}
+```
+- 500: Internal server error
+```json
+{
+  "success": false,
+  "message": "Internal server error",
+  "data": {},
+  "error": "INTERNAL_ERROR"
+}
+```
+
+---
+
+#### Get Chat History
+
+`GET /chat_service/get_chat_history/{chat_id}`
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Chat history retrieved successfully.",
+  "data": {
+    "history": [
+      // List of messages
+    ]
+  },
+  "error": ""
+}
+```
+
+**Error Responses:**
+- 404: Not found
+```json
+{
+  "success": false,
+  "message": "Chat history not found.",
+  "data": {},
+  "error": "NOT_FOUND"
+}
+```
+- 401: Unauthorized
+```json
+{
+  "success": false,
+  "message": "Unauthorized",
+  "data": {},
+  "error": "UNAUTHORIZED"
+}
+```
+- 500: Internal server error
+```json
+{
+  "success": false,
+  "message": "Internal server error",
+  "data": {},
+  "error": "INTERNAL_ERROR"
+}
+```
+
+---
+
+#### Delete All Chat Histories
+
+`DELETE /chat_service/delete_all_chat_histories/{user_id}`
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "All chat threads deleted successfully.",
+  "data": {},
+  "error": ""
+}
+```
+
+**Error Responses:**
+- 404: Not found
+```json
+{
+  "success": false,
+  "message": "No chat histories found for user.",
+  "data": {},
+  "error": "NOT_FOUND"
+}
+```
+- 401: Unauthorized
+```json
+{
+  "success": false,
+  "message": "Unauthorized",
+  "data": {},
+  "error": "UNAUTHORIZED"
+}
+```
+- 500: Internal server error
+```json
+{
+  "success": false,
+  "message": "Internal server error",
+  "data": {},
+  "error": "INTERNAL_ERROR"
+}
+```
+
+---
+
+#### Update Chat Name
+
+`PATCH /chat_service/update_chat_name/{chat_id}/{new_chat_name}`
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Chat thread updated successfully.",
+  "data": {
+    "chat": {
+      "chat_name": "string",
+      "chat_id": "string",
+      "user_id": "string",
+      "anonymous_user_id": "string",
+      "created_at": "datetime",
+      "updated_at": "datetime",
+      "history": []
+    }
+  },
+  "error": ""
+}
+```
+
+**Error Responses:**
+- 404: Not found
+```json
+{
+  "success": false,
+  "message": "Chat thread not found.",
+  "data": {},
+  "error": "NOT_FOUND"
+}
+```
+- 401: Unauthorized
+```json
+{
+  "success": false,
+  "message": "Unauthorized",
+  "data": {},
+  "error": "UNAUTHORIZED"
+}
+```
+- 500: Internal server error
+```json
+{
+  "success": false,
+  "message": "Internal server error",
+  "data": {},
+  "error": "INTERNAL_ERROR"
+}
+```
+
+---
+
+## Response Format
+
+All endpoints return responses in the following format:
+
+```json
+{
+  "success": "boolean",
+  "message": "string",
+  "data": "object" | {},
+  "error": "string"
+}
+```
+
+### RAG Endpoints
+
+#### Query RAG
+
+`POST /rag/query`
+
+**Request Body:**
+```json
+{
+  "chat_id": "string",
+  "query": "string",
+  "web_search": "boolean"
+}
+```
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "RAG query processed successfully",
+  "data": {
+    "response": "string"
+  },
+  "error": ""
+}
+```
+
+**Error Responses:**
+- 404: Chat thread not found
+```json
+{
+  "success": false,
+  "message": "Böyle bir sohbet bulunamadı.",
+  "data": {},
+  "error": "NOT_FOUND"
+}
+```
+- 401: Unauthorized
+```json
+{
+  "success": false,
+  "message": "Unauthorized",
+  "data": {},
+  "error": "UNAUTHORIZED"
+}
+```
+- 500: Internal server error
+```json
+{
+  "success": false,
+  "message": "Sistemde yaşanan bir aksaklık sebebiyle şu an size yardımcı olamıyorum.",
+  "data": {},
+  "error": "INTERNAL_ERROR"
+}
+```

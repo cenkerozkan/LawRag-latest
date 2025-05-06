@@ -20,7 +20,6 @@ async def query_rag(
 ) -> JSONResponse:
     logger.info(f"RAG query request for chat: {rag_request.chat_id}")
     chat_thread: ChatThreadModel = await chat_thread_service.retrieve_chat_thread(rag_request.chat_id)
-    logger.info(f"Chat thread retrieval results: {chat_thread}")
     if not chat_thread.get("success"):
         return JSONResponse(
             status_code=500,

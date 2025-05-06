@@ -68,6 +68,8 @@ class PromptGenerator:
                             - Eğer kullanıcı sorgusu hukukla doğrudan ilgili değilse, yalnızca "false" cevabını dön.
                             - Eğer sorgu belirtilen belgelerle alakasızsa, yine sadece "false" cevabını dön.
                             - Açıklama 3-5 cümleyi geçmemeli, teknik ama sade bir hukuk dili kullanılmalı ve kullanıcıya hitap eden ifadelerden kaçınılmalıdır.
+                            - Varsayımsal metin üretirken, bilgilerin dahilindeki **gerçek kanun adlarını ve madde numaralarını** mümkün olduğunca kullan.
+                            - Gerçekte var olan hukuk terimlerini ve yapıları kullanmaya özen göster.
                             - Cevabın embedding'e uygun, bilgi yoğun ve özgün olmalıdır.
 
                         </instruction>

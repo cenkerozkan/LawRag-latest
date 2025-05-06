@@ -47,10 +47,10 @@ class RagService:
             self._turkish_criminal_law_repository = TurkishCriminalLawDocumentRepository(file_path="./pdf/turk_ceza_kanun.pdf")
 
             # Initialize the document repositories.
-            self._worker_laws_repository.init_documents()
-            self._obligations_laws_repository.init_documents()
-            self._industrial_property_laws_repository.init_documents()
-            self._turkish_criminal_law_repository.init_documents()
+            #self._worker_laws_repository.init_documents()
+            #self._obligations_laws_repository.init_documents()
+            #self._industrial_property_laws_repository.init_documents()
+            #self._turkish_criminal_law_repository.init_documents()
 
         except Exception as e:
             self._logger.error(f"Error initializing RagService: {e}")

@@ -128,7 +128,7 @@ Other HTTP errors will return the original error message in the `message` field.
 {
   "chat_name": "string",
   "user_id": "string",
-  "anonymous_user_id": "string (optional)"
+  "anonymous_user_id": "string" | null
 }
 ```
 
@@ -142,7 +142,7 @@ Other HTTP errors will return the original error message in the `message` field.
       "chat_name": "string",
       "chat_id": "string",
       "user_id": "string",
-      "anonymous_user_id": "string",
+      "anonymous_user_id": "string" | null
       "created_at": "datetime",
       "updated_at": "datetime",
       "history": []
@@ -159,7 +159,7 @@ Other HTTP errors will return the original error message in the `message` field.
   "success": false,
   "message": "Invalid request parameters",
   "data": {},
-  "error": "BAD_REQUEST"
+  "error": ""
 }
 ```
 - 401: Unauthorized
@@ -168,7 +168,7 @@ Other HTTP errors will return the original error message in the `message` field.
   "success": false,
   "message": "Unauthorized",
   "data": {},
-  "error": "UNAUTHORIZED"
+  "error": ""
 }
 ```
 - 500: Internal server error
@@ -177,7 +177,7 @@ Other HTTP errors will return the original error message in the `message` field.
   "success": false,
   "message": "Internal server error",
   "data": {},
-  "error": "INTERNAL_ERROR"
+  "error": ""
 }
 ```
 
@@ -261,7 +261,7 @@ Other HTTP errors will return the original error message in the `message` field.
   "success": false,
   "message": "No chat threads found for user.",
   "data": {},
-  "error": "NOT_FOUND"
+  "error": ""
 }
 ```
 - 401: Unauthorized
@@ -270,7 +270,7 @@ Other HTTP errors will return the original error message in the `message` field.
   "success": false,
   "message": "Unauthorized",
   "data": {},
-  "error": "UNAUTHORIZED"
+  "error": ""
 }
 ```
 - 500: Internal server error
@@ -279,7 +279,7 @@ Other HTTP errors will return the original error message in the `message` field.
   "success": false,
   "message": "Internal server error",
   "data": {},
-  "error": "INTERNAL_ERROR"
+  "error": ""
 }
 ```
 

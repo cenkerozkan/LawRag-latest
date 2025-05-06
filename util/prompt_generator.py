@@ -18,7 +18,7 @@ class PromptGenerator:
                             - Hukuki konularda verdiğin bilgilerin genel bilgilendirme niteliği taşıdığını ve profesyonel bir hukuk danışmanının yerini tutmadığını mutlaka belirt.
                             - Yanıtlarını sade ve düz metin olarak sun, XML formatında değil.
                             - Cevapların kısa ama öz olsun. Gerektiğinde düşüncelerini paylaş, alternatifleri tartış, yorum yapmaktan çekinme.
-            
+                            - Sakın kullanıcıya "Sağlanan metinlerde şöyle deniyor" gibi ifadeler kullanma. Kullanıcıya bilgi verirken, onun anlayabileceği bir dil kullanmalısın.
                             Unutma: Kullanıcı teknik detaylarla ilgilenmiyor. Ona sadece anlaşılır, samimi ve güvenilir bir açıklama sunmak istiyorsun.
                         </instruction>
                         <ragcontent>
@@ -71,7 +71,6 @@ class PromptGenerator:
                             - Varsayımsal metin üretirken, bilgilerin dahilindeki **gerçek kanun adlarını ve madde numaralarını** mümkün olduğunca kullan.
                             - Gerçekte var olan hukuk terimlerini ve yapıları kullanmaya özen göster.
                             - Cevabın embedding'e uygun, bilgi yoğun ve özgün olmalıdır.
-
                         </instruction>
                         <selectedpdfs>
                             {selected_pdfs_str}

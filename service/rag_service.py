@@ -178,7 +178,7 @@ class RagService:
                                                 content=query, web_sources=[]))
         chat_thread.history.append(MessageModel(created_at=datetime.datetime.now().isoformat(), role="ai",
                                                 content=response.text,
-                                                web_sources=[result.get("page_url", "") for result in web_search_results] if web_search else None))
+                                                web_sources=[result.get("page_url", "") for result in web_search_results] if web_search else []))
 
         _: dict = await self._context_repository.update_one(chat_thread)
         # Try three more times, then leave it.

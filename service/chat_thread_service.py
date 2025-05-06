@@ -130,10 +130,11 @@ class ChatThreadService:
                            "error": crud_result.get("error", "")})
             return result
         if crud_result.get("data").get("history") is None:
-            result.update({"code": 200, "success": crud_result.get("success"), "message": crud_result.get("message"),})
+            result.update({"code": 200, "success": crud_result.get("success"), "message": crud_result.get("message"),
+                           "data": {"history": crud_result.get("history")}})
             return result
         result.update({"code": 200, "success": True, "message": crud_result.get("message"),
-                       "data": {"history": crud_result.get("data").get("history")}})
+                       "data": {"history": crud_result.get("data")}})
         return result
 
     async def delete_all_chat_histories(

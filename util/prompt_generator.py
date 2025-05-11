@@ -58,19 +58,20 @@ class PromptGenerator:
         prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
                     <prompt>
                         <instruction>
-                            Bu görev, HyDE RAG (Hypothetical Document Embeddings for Retrieval-Augmented Generation) yaklaşımına göre çalışır.
-                            Amacın, kullanıcının sorduğu hukuki soruya karşılık olarak, embedding işleminde kullanılacak bağlamsal ve teknik bir açıklama üretmektir.
+                        Bu görev, HyDE RAG (Hypothetical Document Embeddings for Retrieval-Augmented Generation) yaklaşımına göre çalışır.
+                        Amacın, kullanıcının sorduğu hukuki soruya karşılık olarak, embedding işleminde kullanılacak bağlamsal ve teknik bir açıklama üretmektir.
 
-                            - Üreteceğin açıklama, kullanıcının kastettiği hukuki sorunun özetini ve teknik içeriğini temsil etmelidir.
-                            - Bu açıklama sayesinde sistem, daha isabetli hukuki içeriklere erişecektir.
-                            - Kullanıcının ilgilendiği kanunlar listelenmiştir. Yalnızca bu belgeler çerçevesinde içerik üret.
-                            - Eğer kullanıcı sorgusu hukukla doğrudan ilgili değilse, yalnızca "false" cevabını dön.
-                            - Eğer sorgu belirtilen belgelerle alakasızsa, yine sadece "false" cevabını dön.
-                            - Açıklama 3-5 cümleyi geçmemeli, teknik ama sade bir hukuk dili kullanılmalı ve kullanıcıya hitap eden ifadelerden kaçınılmalıdır.
-                            - Varsayımsal metin üretirken, bilgilerin dahilindeki **gerçek kanun adlarını ve madde numaralarını** mümkün olduğunca kullan.
-                            - Gerçekte var olan hukuk terimlerini ve yapıları kullanmaya özen göster.
-                            - Cevabın embedding'e uygun, bilgi yoğun ve özgün olmalıdır. Sample'ı göz önünde bulundurabilirsin.
-                        </instruction>
+                        - Üreteceğin açıklama, kullanıcının kastettiği hukuki sorunun özetini ve teknik içeriğini temsil etmelidir.
+                        - Bu açıklama sayesinde sistem, daha isabetli hukuki içeriklere erişecektir.
+                        - Kullanıcının ilgilendiği kanunlar listelenmiştir. Yalnızca bu belgeler çerçevesinde içerik üret.
+                        - Eğer kullanıcı sorgusu hukukla doğrudan ilgili değilse, yalnızca "false" cevabını dön.
+                        - Eğer sorgu belirtilen belgelerle alakasızsa, yine sadece "false" cevabını dön.
+                        - Açıklama 3-5 cümleyi geçmemeli, teknik ama sade bir hukuk dili kullanılmalı ve kullanıcıya hitap eden ifadelerden kaçınılmalıdır.
+                        - Varsayımsal metin üretirken, bilgilerin dahilindeki **gerçek kanun adlarını ve madde numaralarını** mümkün olduğunca kullan.
+                        - Sample’larda görüldüğü gibi, her cevaptaki madde atıfları (ör. “TBK Madde 49”, “TCK Madde 125/I”) kullanılmalı ve 3 maddelik net bir liste halinde sunulmalıdır.
+                        - Gerçekte var olan hukuk terimlerini ve yapıları kullanmaya özen göster.
+                        - Cevabın embedding'e uygun, bilgi yoğun ve özgün olmalıdır. Sample’ı göz önünde bulundurabilirsin.
+                    </instruction>
                         <samples>
                             <sample tag="borçlar_kanunu">
                                 <question>
@@ -93,7 +94,6 @@ class PromptGenerator:
                                     Madde 21: “İşveren, fesih bildirimini yazılı yapmak ve geçerli nedeni açıkça belirtmek zorundadır.”
                                 </answer>
                             </sample>
-                        
                             <sample tag="sinai_mülkiyet_kanunu">
                                 <question>
                                     Markam başkası tarafından izinsiz kullanılırsa ne yapabilirim?

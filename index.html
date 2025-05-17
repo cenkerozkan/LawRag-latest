@@ -280,30 +280,40 @@ body {
 <script>
 const API_BASE_URL = "http://127.0.0.1:8000";
 //const API_BASE_URL = " https://7678-212-156-75-166.ngrok-free.app";
+const USER_ID = "cenkerozkan"; // Using your GitHub login as user_id
+const JWT_TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjY3ZDhjZWU0ZTYwYmYwMzYxNmM1ODg4NTJiMjA5MTZkNjRjMzRmYmEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vYXRpbGltLWJ1cy1wcm9qZWN0LWQ0ZTZiIiwiYXVkIjoiYXRpbGltLWJ1cy1wcm9qZWN0LWQ0ZTZiIiwiYXV0aF90aW1lIjoxNzQ3NDk0NTI1LCJ1c2VyX2lkIjoiNVdHS1V6dGtmMGVKRlphM3Nmd2hlTklHOGxZMiIsInN1YiI6IjVXR0tVenRrZjBlSkZaYTNzZndoZU5JRzhsWTIiLCJpYXQiOjE3NDc0OTQ1MjUsImV4cCI6MTc0NzQ5ODEyNSwiZW1haWwiOiJvemthbi5jZW5rZXJAc3R1ZGVudC5hdGlsaW0uZWR1LnRyIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbIm96a2FuLmNlbmtlckBzdHVkZW50LmF0aWxpbS5lZHUudHIiXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.FE9SmKyU8fJoqpjhC0FPe2kjumyWxpFScf88MtVOr90V56zA-PUHIjZEQK8TKjJR3RkCKcjt-UTc6_bLyFIbuK1kXHb9YNuDn6o2C3RvmoArIt0Mo2tqksrufWCS5VYsIcDJMdSMZ_r2o1kRWQNGsaBwlN66jJ4VazE2XKsFht1k-BCV4QozChCGC55F7IeO13prQNiskpPspVyGoP6XmPTuBQd1ojQ1hz-mc1JrJ8o6_8zAc0eJFNkuGpnNxXTjxUiX4Sbu8Xusyp9f3Au-pHaNPn41kCAyDnk5tZVzZvqtIEk35XDLlY9iOJ5cbdO9G_0_UWEO-lyPEJb_NIXv_g";
 let currentChatId = null;
 const md = window.markdownit();
 
 async function loadChats() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/chats`);
-        if (!response.ok) throw new Error("Failed to load chats");
-        const chats = await response.json();
+        const response = await fetch(`${API_BASE_URL}/chat_service/get_all_chat_threads/${USER_ID}`, {
+            headers: {
+                'Authorization': `Bearer ${JWT_TOKEN}`
+            }
+        });
+        if (!response.ok) throw new Error(`Failed to load chats: ${response.statusText}`);
+        const responseData = await response.json();
 
         const chatList = document.getElementById('chatList');
         chatList.innerHTML = '';
 
-        chats.forEach(chat => {
-            const chatItem = document.createElement('div');
-            chatItem.className = 'chat-item';
-            chatItem.innerHTML = `
-                <span onclick="selectChat('${chat.chat_id}')">${chat.chat_name}</span>
-                <button class="delete-btn" onclick="deleteChat('${chat.chat_id}')">🗑</button>
-            `;
-            chatList.appendChild(chatItem);
-        });
+        if (responseData.data && responseData.data.threads) {
+            responseData.data.threads.forEach(chat => {
+                const chatItem = document.createElement('div');
+                chatItem.className = 'chat-item';
+                chatItem.innerHTML = `
+                    <span onclick="selectChat('${chat.chat_id}')">${chat.chat_name}</span>
+                    <button class="delete-btn" onclick="deleteChat('${chat.chat_id}')">🗑</button>
+                `;
+                chatList.appendChild(chatItem);
+            });
+        } else {
+             console.warn("No threads found or unexpected response structure:", responseData);
+        }
     } catch (error) {
         console.error("Error loading chats:", error);
-        alert("Failed to load chats. Please check your server.");
+        alert("Failed to load chats. Please check your server and API response.");
     }
 }
 
@@ -317,22 +327,29 @@ async function createChat() {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/chats`, {
+        const response = await fetch(`${API_BASE_URL}/chat_service/create`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_name: chatName })
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${JWT_TOKEN}`
+            },
+            body: JSON.stringify({
+                chat_name: chatName,
+                user_id: USER_ID,
+                anonymous_user_id: null
+            })
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to create chat: ${response.statusText}`);
+            throw new Error(`Failed to create chat: ${response.statusText} - ${await response.text()}`);
         }
 
         const result = await response.json();
         chatNameInput.value = '';
         await loadChats();
 
-        if (result && result.chat_id) {
-            selectChat(result.chat_id);
+        if (result.data && result.data.chat && result.data.chat.chat_id) {
+            selectChat(result.data.chat.chat_id);
         }
     } catch (error) {
         console.error("Error creating chat:", error);
@@ -342,9 +359,14 @@ async function createChat() {
 
 async function deleteChat(chatId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/chats/${chatId}`, { method: 'DELETE' });
+        const response = await fetch(`${API_BASE_URL}/chat_service/delete/${chatId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${JWT_TOKEN}`
+            }
+        });
 
-        if (!response.ok) throw new Error("Failed to delete chat");
+        if (!response.ok) throw new Error(`Failed to delete chat: ${response.statusText}`);
 
         if (currentChatId === chatId) {
             currentChatId = null;
@@ -361,11 +383,20 @@ async function deleteChat(chatId) {
 async function selectChat(chatId) {
     try {
         currentChatId = chatId;
-        const response = await fetch(`${API_BASE_URL}/api/chats/${chatId}`);
-        if (!response.ok) throw new Error("Failed to load chat messages");
+        const response = await fetch(`${API_BASE_URL}/chat_service/get_chat_history/${chatId}`, {
+            headers: {
+                'Authorization': `Bearer ${JWT_TOKEN}`
+            }
+        });
+        if (!response.ok) throw new Error(`Failed to load chat messages: ${response.statusText}`);
 
-        const chat = await response.json();
-        displayMessages(chat.history);
+        const chatData = await response.json();
+        if (chatData.data && chatData.data.history) {
+            displayMessages(chatData.data.history);
+        } else {
+            displayMessages([]);
+            console.warn("No history found or unexpected response structure:", chatData);
+        }
     } catch (error) {
         console.error("Error selecting chat:", error);
         alert("Failed to load messages. Please check your server.");
@@ -379,7 +410,8 @@ function displayMessages(messages) {
     messages.forEach(message => {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`;
-        messageDiv.innerHTML = md.render(message.content);
+        const contentToRender = (typeof message.content === 'string') ? message.content : '';
+        messageDiv.innerHTML = md.render(contentToRender);
         chatMessages.appendChild(messageDiv);
     });
 
@@ -416,7 +448,6 @@ function addAssistantMessageWithStreaming(message) {
 
     function streamText() {
         if (i < words.length) {
-            // Get next chunk of words (up to 4)
             const chunk = words.slice(i, i + wordsPerChunk);
             tempText += (i === 0 ? "" : " ") + chunk.join(" ");
             messageDiv.innerHTML = md.render(tempText + " ▌");
@@ -428,13 +459,11 @@ function addAssistantMessageWithStreaming(message) {
             scrollToBottom();
         }
     }
-
     streamText();
 }
 
 async function sendMessage() {
     if (!currentChatId) {
-        // Create a random chat name
         const randomName = `Chat ${new Date().toLocaleString('en-US', {
             month: 'short',
             day: 'numeric',
@@ -443,22 +472,33 @@ async function sendMessage() {
         })}`;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/chats`, {
+            const response = await fetch(`${API_BASE_URL}/chat_service/create`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_name: randomName })
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JWT_TOKEN}`
+                },
+                body: JSON.stringify({
+                    chat_name: randomName,
+                    user_id: USER_ID,
+                    anonymous_user_id: null
+                })
             });
 
             if (!response.ok) {
-                throw new Error(`Failed to create chat: ${response.statusText}`);
+                throw new Error(`Failed to create chat: ${response.statusText} - ${await response.text()}`);
             }
 
             const result = await response.json();
             await loadChats();
-            currentChatId = result.chat_id;
+            if (result.data && result.data.chat && result.data.chat.chat_id) {
+                currentChatId = result.data.chat.chat_id;
+            } else {
+                throw new Error("Failed to get chat_id from new chat response.");
+            }
         } catch (error) {
-            console.error("Error creating chat:", error);
-            alert("Error creating chat. Please try again.");
+            console.error("Error creating chat automatically:", error);
+            alert("Error creating a new chat. Please try again.");
             return;
         }
     }
@@ -483,12 +523,16 @@ async function sendMessage() {
         chatMessages.appendChild(thinkingDiv);
         scrollToBottom();
 
+        // The endpoint for sending messages (/api/chats/{chatId}/messages)
+        // This also needs the Authorization header if this endpoint is secured.
         const response = await fetch(`${API_BASE_URL}/api/chats/${currentChatId}/messages`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${JWT_TOKEN}` // Added JWT here as well
+            },
             body: JSON.stringify({
                 message,
-                chat_id: currentChatId,
                 web_search: webSearchEnabled
             })
         });
@@ -511,6 +555,8 @@ async function sendMessage() {
 
     } catch (error) {
         console.error("Error sending message:", error);
+        const thinkingDiv = chatMessages.querySelector("em")?.parentElement;
+        if(thinkingDiv) chatMessages.removeChild(thinkingDiv);
         addAssistantMessageWithStreaming("Sorry, an error occurred while processing your message.");
     } finally {
         document.getElementById('sendButton').disabled = false;

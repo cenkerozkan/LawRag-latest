@@ -101,6 +101,33 @@ async def fetch_page_content(list_of_urls: list) -> list:
 
 
 async def google_search(search_query: str):
+    """
+    Sample response for google_search:
+    [
+        {
+            "page_url": "https://example.com/page1",
+            "content": "This is the cleaned text content from page 1...",
+            "role": "Google Search"
+        },
+        {
+            "page_url": "https://example.com/page2.pdf",
+            "content": "This is the extracted text from the PDF on page 2...",
+            "role": "Google Search"
+        },
+        {
+            "page_url": "https://anotherexample.org/article",
+            "content": "Article text cleaned and extracted...",
+            "role": "Google Search"
+        },
+        None, # Could be None if a particular URL fetch failed
+        {
+            "page_url": "https://example.com/page3",
+            "content": "More content from another page...",
+            "role": "Google Search"
+        }
+    ]
+    Or None if the initial Google Custom Search API call fails.
+    """
     base_url = f"https://www.googleapis.com/customsearch/v1?key={os.getenv('GOOGLE_CUSTOM_SEARCH_API')}&cx={os.getenv('GOOGLE_CUSTOM_SEARCH_ENGINE_ID')}"
     query_result: dict
     final_result: list[dict]

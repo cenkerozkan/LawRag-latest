@@ -19,18 +19,20 @@ async def query_rag(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ) -> JSONResponse:
     logger.info(f"RAG query request for chat: {rag_request.chat_id}")
-    chat_thread: ChatThreadModel = await chat_thread_service.retrieve_chat_thread(rag_request.chat_id)
-    if not chat_thread.get("success"):
+    service_result: ChatThreadModel = await chat_thread_service.retrieve_chat_thread(rag_request.chat_id)
+    logger.info(f"Chat thread: {service_result}")
+    if not service_result.get("success"):
         return JSONResponse(
             status_code=500,
-            content=ResponseModel(success=False, message=chat_thread.get("message", ""),
+            content=ResponseModel(success=False, message=service_result.get("message", ""),
                                   data={}, error="").model_dump())
-    if not chat_thread.get("data"):
+    if not isinstance(service_result.get("data"), ChatThreadModel):
         return JSONResponse(
-            status_code=404,
-            content=ResponseModel(success=False, message="Böyle bir sohbet bulunamadı.",
+            status_code=500,
+            content=ResponseModel(success=False, message="Bilinmeyen bir hata oluştu!",
                                   data={}, error="").model_dump())
-    result = await rag_service.run(query=rag_request.query, chat_thread=chat_thread.get("data"),
+
+    result = await rag_service.run(query=rag_request.query, chat_thread=service_result.get("data"),
                                    web_search=rag_request.web_search)
     logger.info(f"RAG query result: {result}")
     return JSONResponse(

@@ -121,15 +121,16 @@ class RagService:
             self,
             chat_thread: ChatThreadModel
     ) -> bool:
-        is_updated: bool
-
+        is_updated: bool = False
         chat_thread.updated_at = datetime.datetime.now().isoformat()
         self._logger.info(f"Updating chat thread: {chat_thread.chat_id}")
         update_crud_result = await self._context_repository.update_one(chat_thread)
-        if not update_crud_result.get("success"):
-            self._logger.error(f"Something went wrong while updating chat thread: {chat_thread.chat_id}")
+        if not update_crud_result:
+            self._logger.error(f"Failed to update chat thread: {chat_thread.chat_id}")
             is_updated = False
-        is_updated = True
+        if update_crud_result:
+            self._logger.info(f"Chat thread updated successfully: {chat_thread.chat_id}")
+            is_updated = True
         return is_updated
 
     async def run(
@@ -145,18 +146,24 @@ class RagService:
             "data": ""
         }
         web_search_results: list[dict[str, str]]
+        web_sources: list[str] | None = None
+
         # Fetch contents (context history or message history you can say).
         contents: list = [str({"role": msg.role, "content": msg.content}) for msg in
                           chat_thread.history[-MESSAGE_HISTORY_SIZE:]]
+
         # Retrieve information from vector db repositories.
         document_content: str = await self._retrieve_document_content(query, contents)
+
         # Generate system instructions
         prompt: str = self._prompt_generator.generate_main_prompt(rag_content=document_content, user_query=query)
+
 
         # If web search is asked.
         if web_search:
             web_search_results = await self._retrieve_web_search_content(query, contents)
             contents.extend([str(result) for result in web_search_results])
+            web_sources = [result.get("page_url", "") for result in web_search_results]
 
         # Generate content with Gemini.
         try:
@@ -175,23 +182,28 @@ class RagService:
         # Only update chat thread if the gemini response is successful.
         # Create a new message model and update them accordingly.
         chat_thread.history.append(MessageModel(created_at=datetime.datetime.now().isoformat(), role="user",
-                                                content=query, web_sources=[]))
+                                                content=query, web_sources=None))
         chat_thread.history.append(MessageModel(created_at=datetime.datetime.now().isoformat(), role="ai",
                                                 content=response.text,
-                                                web_sources=[result.get("page_url", "") for result in web_search_results] if web_search else []))
+                                                web_sources=web_sources))
 
-        _: dict = await self._context_repository.update_one(chat_thread)
+        _: bool = await self._context_repository.update_one(chat_thread)
         # Try three more times, then leave it.
-        if not _["success"]:
+        if not _:
             for i in range(3):
                 self._logger.error(f"Something went wrong while updating chat thread: {chat_thread.chat_id}")
                 is_updated = await self._update_chat_thread(chat_thread)
                 if is_updated:
                     result.update({
                         "success": True,
-                        "message": "RAG query processed successfully",
+                        "message": "RAG Sorgusu başarıyla tamamlandı.",
                         "data": {"response": response.text}})
                     break
+                if i == 2:
+                    self._logger.error(f"Failed to update chat thread after 3 attempts: {chat_thread.chat_id}")
+                    result.update({"success": False, "message": "Sohbet sırasında bir şeyler ters gitti!.",
+                                   "data": {"response": "Şu anda size yardımcı olamıyorum."}})
+                    return result
         result.update({"code":200, "success": True, "message": "RAG query processed successfully", "data": {"response": response.text}})
         return result
 

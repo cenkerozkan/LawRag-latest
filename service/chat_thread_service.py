@@ -99,16 +99,13 @@ class ChatThreadService:
             "error": ""
         }
         self._logger.info(f"Retrieving chat thread: {chat_id}")
-        crud_result: dict = await self._context_repository.get_one_by_id(chat_id)
-        if not crud_result.get("success"):
-            result.update({"code": 500, "success": False, "message": crud_result.get("message", ""),
-                           "error": crud_result.get("error", "")})
+        crud_result: ChatThreadModel | None = await self._context_repository.get_one_by_id(chat_id)
+        if crud_result is None:
+            self._logger.error(f"Failed to retrieve chat thread")
+            result.update({"code": 500, "success": False, "message": "Sohbet getirilirken bir sorun oluştu."})
             return result
-        if not crud_result.get("data"):
-            result.update({"code": 404, "success": False, "message": crud_result.get("message")})
-            return result
-        result.update({"success": True, "message": "Chat thread retrieved successfully",
-                       "data": crud_result.get("data")})
+
+        result.update({"code": 200, "success": True, "data": crud_result})
         return result
 
     async def get_chat_history(

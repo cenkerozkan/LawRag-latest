@@ -108,14 +108,11 @@ class ContextRepository(MongoDBRepositoryBase):
         crud_results: any
         try:
             crud_results = self._collection.find({"user_id": user_id})
+
         except Exception as e:
             self._logger.error(f"Retrieving documents error: {e}")
-        if crud_results is None:
             return None
-        chat_threads: list[ChatThreadModel] = []
-        async for chat_thread in crud_results:
-            chat_threads.append(ChatThreadModel(**chat_thread))
-        return chat_threads
+        return [ChatThreadModel(**result) async for result in crud_results]
 
     async def update_one(
             self,
@@ -140,18 +137,7 @@ class ContextRepository(MongoDBRepositoryBase):
             self,
             chat_history: ChatThreadModel
     ) -> bool:
-        self._logger.info(f"Deleting document with id: {chat_history.chat_id}")
-        try:
-            crud_result: any = await self._collection.delete_one({"chat_id": chat_history.chat_id})
-            if crud_result.deleted_count > 0:
-                self._logger.info(f"Chat with id: {chat_history.chat_id} deleted successfully")
-                return True
-            else:
-                self._logger.warn(f"Chat with id: {chat_history.chat_id} not found")
-                return False
-        except Exception as e:
-            self._logger.error(f"An error occured: {e}")
-            return False
+        raise NotImplementedError
 
     async def delete_one_by_id(
             self,
@@ -203,17 +189,13 @@ class ContextRepository(MongoDBRepositoryBase):
     async def get_chat_history(
             self,
             chat_id: str
-    ) -> list[MessageModel]:
+    ) -> list[MessageModel] | None:
         self._logger.info(f"Retrieving chat history for chat_id: {chat_id}")
+        crud_result: any
         try:
             crud_result = await self._collection.find_one({"chat_id": chat_id})
         except Exception as e:
             self._logger.error(f"Retrieving chat history error: {e}")
-            return []
-        if crud_result is None:
-            self._logger.warn(f"No chat history found for chat_id: {chat_id}")
-            return []
-        chat_history: list[MessageModel] = []
-        async for message in crud_result.get("messages", []):
-            chat_history.append(MessageModel(**message))
-        return chat_history
+            return None
+        if crud_result:
+            return [MessageModel(**message) for message in crud_result.get("history", [])]

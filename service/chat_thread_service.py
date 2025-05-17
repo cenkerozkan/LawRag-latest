@@ -24,7 +24,7 @@ class ChatThreadService:
             "data": {}
         }
         self._logger.info(f"Creating chat thread: {chat_name}")
-        new_chat = ChatThreadModel(
+        new_chat: ChatThreadModel = ChatThreadModel(
             chat_name=chat_name,
             chat_id=uuid_generator(),
             user_id=user_id,
@@ -33,12 +33,13 @@ class ChatThreadService:
             updated_at=datetime.datetime.now().isoformat(),
             history=[]
         )
-        crud_result: dict = await self._context_repository.insert_one(new_chat)
-        if not crud_result.get("success"):
-            self._logger.error(f"Failed to create chat thread")
-            result.update({"code": 500, "success": False, "message": crud_result.get("message", ""), "error": crud_result.get("error", "")})
+        is_inserted: bool = await self._context_repository.insert_one(new_chat)
+        if is_inserted:
+            result.update({"code": 200, "success": True, "message": "Chat thread created successfully",
+                           "data": {"chat": new_chat.model_dump()}})
             return result
-        result.update({"code": 200, "success": True, "message": "Chat thread created successfully","data": {"chat": new_chat.model_dump()}})
+        result.update({"code": 500, "success": False, "message": "Chat thread creation failed"})
+        self._logger.error(f"Chat thread creation failed")
         return result
 
     async def delete_chat_thread(
@@ -53,13 +54,12 @@ class ChatThreadService:
             "error": ""
         }
         self._logger.info(f"Deleting chat thread: {chat_id}")
-        crud_result: dict = await self._context_repository.delete_one_by_id(chat_id)
-        if not crud_result.get("success"):
-            self._logger.error(f"Failed to delete chat thread")
-            result.update({"code": 404, "success": False, "message": crud_result.get("message", ""),
-                           "error": crud_result.get("error", "")})
+        crud_result: bool = await self._context_repository.delete_one_by_id(chat_id)
+        if not crud_result:
+            self._logger.error(f"Failed to delete chat thread: {chat_id}")
+            result.update({"code": 500, "success": False, "message": "Chat thread deletion failed"})
             return result
-        result.update({"code": 200, "success": True, "message": crud_result.get("message")})
+        result.update({"code": 200, "success": True, "message": "Chat thread deleted successfully"})
         return result
 
     async def get_all_chat_threads(
@@ -74,19 +74,19 @@ class ChatThreadService:
             "error": ""
         }
         self._logger.info(f"Getting all chat threads: {user_id}")
-        crud_result: dict = await self._context_repository.get_all_by_user_id(user_id)
-        if not crud_result.get("success"):
-            self._logger.error(f"Failed to get all chat threads for user: {user_id}")
-            result.update({"code": 404, "success": False, "message": crud_result.get("message", ""),
-                           "error": crud_result.get("error", "")})
+        crud_result: list = await self._context_repository.get_all_by_user_id(user_id)
+        refined_threads: list
+        if crud_result is None:
+            self._logger.error(f"Failed to retrieve chat threads")
+            result.update({"code": 500, "success": False, "message": "Chat thread retrieval failed"})
             return result
-        if len(crud_result.get("data")) == 0:
-            result.update({"code": 200, "success": True, "message": "Herhangi bir sohbet geçmişi bulunamadı."})
-            return result
-        result.update({"code": 200, "success": True, "message": crud_result.get("message"),
-                       "data": {"threads": crud_result.get("data")}})
+        refined_threads: list = [thread.model_dump(exclude={"history"}) for thread in crud_result]
+        result.update({"code": 200, "success": True, "message": "Sohbetler başarıyla alındı",
+                       "data": {"threads": refined_threads}})
         return result
 
+    # NOTE: This one is used by RAG service route to fetch the chat data. DO NOT MODIFY OR DELETE IT
+    #       IF NOT NEEDED!
     async def retrieve_chat_thread(
             self,
             chat_id: str
@@ -122,19 +122,15 @@ class ChatThreadService:
             "error": "",
             "data": {}
         }
-        self._logger.info(f"Retrieving chat history for chat: {chat_id}")
-        crud_result: dict = await self._context_repository.get_chat_history(chat_id)
-        if not crud_result.get("success"):
-            self._logger.error(f"Some error occured while retrieving chat history: {crud_result.get('error')}")
-            result.update({"code": 500, "success": False, "message": crud_result.get("message", ""),
-                           "error": crud_result.get("error", "")})
+        chat_history: list
+        self._logger.info(f"Getting chat history for chat ID: {chat_id}")
+        chat_history = await self._context_repository.get_chat_history(chat_id)
+        if chat_history is None:
+            self._logger.error(f"Failed to retrieve chat history")
+            result.update({"code": 500, "success": False, "message": "Chat history retrieval failed"})
             return result
-        if crud_result.get("data").get("history") is None:
-            result.update({"code": 200, "success": crud_result.get("success"), "message": crud_result.get("message"),
-                           "data": {"history": crud_result.get("history")}})
-            return result
-        result.update({"code": 200, "success": True, "message": crud_result.get("message"),
-                       "data": {"history": crud_result.get("data")}})
+        result.update({"code": 200, "success": True, "message": "Chat history retrieved successfully",
+                       "data": {"history": chat_history}})
         return result
 
     async def delete_all_chat_histories(
@@ -149,13 +145,12 @@ class ChatThreadService:
             "data": {}
         }
         self._logger.info(f"Deleting all chat histories for user: {user_id}")
-        crud_result: dict = await self._context_repository.delete_all_by_user_id(user_id)
-        if not crud_result.get("success"):
-            self._logger.error(f"Failed to delete all chat histories")
-            result.update({"code": 400, "success": False, "message": crud_result.get("message", ""),
-                           "error": crud_result.get("error", "")})
+        crud_result: bool = await self._context_repository.delete_all_by_user_id(user_id)
+        if not crud_result:
+            self._logger.error(f"Failed to delete chat histories")
+            result.update({"code": 500, "success": False, "message": "Chat history deletion failed"})
             return result
-        result.update({"code": 200, "success": True, "message": crud_result.get("message")})
+        result.update({"code": 200, "success": True, "message": "Chat histories deleted successfully"})
         return result
 
     async def update_chat_thread_name(
@@ -171,28 +166,21 @@ class ChatThreadService:
             "data": {}
         }
         self._logger.info(f"Updating chat thread: {chat_id}")
-        retrieve_chat_result: dict = await self._context_repository.get_one_by_id(chat_id)
-        if not retrieve_chat_result.get("success"):
-            self._logger.error(f"Failed to retrieve chat thread for update")
-            result.update({"code": 404, "success": False, "message": retrieve_chat_result.get("message", ""),
-                           "error": retrieve_chat_result.get("error", "")})
+        # First fetch the chat_thread with the given chat_id
+        chat_thread: ChatThreadModel = await self._context_repository.get_one_by_id(chat_id)
+        if chat_thread is None:
+            self._logger.error(f"Failed to retrieve chat thread")
+            result.update({"code": 500, "success": False, "message": "Chat thread retrieval failed"})
             return result
-        if retrieve_chat_result.get("data") is None:
-            result.update({"code": 404, "success": False, "message": retrieve_chat_result.get("message")})
-            return result
-
-        # Retrieve the existing chat thread and create a pydantic model.
-        existing_chat_thread: ChatThreadModel = retrieve_chat_result.get("data")
-        existing_chat_thread.chat_name = chat_name
-        existing_chat_thread.updated_at = datetime.datetime.now().isoformat()
-        update_crud_result: dict = await self._context_repository.update_one(existing_chat_thread)
-        if not update_crud_result.get("success"):
+        # Update the chat_name
+        chat_thread.chat_name = chat_name
+        is_updated: bool = await self._context_repository.update_one(chat_thread)
+        if not is_updated:
             self._logger.error(f"Failed to update chat thread")
-            result.update({"code": 500, "success": False, "message": update_crud_result.get("message", ""),
-                           "error": update_crud_result.get("error", "")})
+            result.update({"code": 500, "success": False, "message": "Chat thread update failed"})
             return result
-        result.update({"code": 200, "success": True, "message": update_crud_result.get("message"),
-                       "data": {"chat": existing_chat_thread.model_dump()}})
+        result.update({"code": 200, "success": True, "message": "Chat thread updated successfully",
+                       "data": {"chat": chat_thread.model_dump()}})
         return result
 
 

@@ -1,6 +1,7 @@
 from pymongo import AsyncMongoClient
 
 from base.mongodb_repository_base import MongoDBRepositoryBase
+from db.model.message_model import MessageModel
 from util.logger import get_logger
 from db.mongodb_connector import MongoDBConnector
 from db.model.chat_thread_model import ChatThreadModel
@@ -41,21 +42,14 @@ class ContextRepository(MongoDBRepositoryBase):
     async def insert_one(
             self,
             document: ChatThreadModel
-    ) -> dict:
-        result: dict = {
-            "success": False,
-            "message": "",
-            "error": ""
-        }
+    ) -> bool:
         self._logger.info(f"Inserting document: {document}")
         try:
             await self._collection.insert_one(document.model_dump())
-            result.update({"success": True, "message": "Chat history created successfully"})
+            return True
         except Exception as e:
-            result.update({"success": False, "message": "Chat history creation failed", "error": str(e)})
             self._logger.error(e)
-            raise Exception(e)
-        return result
+            return False
 
     async def insert_many(
             self,
@@ -79,108 +73,62 @@ class ContextRepository(MongoDBRepositoryBase):
     async def get_one_by_id(
             self,
             id: str
-    ) -> dict[str, str | ChatThreadModel]:
-        result: dict = {
-            "success": False,
-            "message": "",
-            "error": "",
-            "data": {}
-        }
-        crud_result: dict = {}
+    ) -> ChatThreadModel | None:
         self._logger.info(f"Retrieving document with id: {id}")
         try:
             crud_result = await self._collection.find_one({"chat_id": id})
         except Exception as e:
-            result.update({"success": False, "message": "Sohbet geçmişi getirilirken bir hata oluştu", "error": str(e)})
             self._logger.error(f"Retrieving document error: {e}")
-            return result
+            return None
         if crud_result is None:
-            result.update({"success": False, "message": "Böyle bir sohbet geçmişi bulunamadı."})
-            return result
-        result.update({"success": True, "message": "Sohbet geçmişi başarılı bir şekilde getirildi.",
-                       "data": ChatThreadModel(**crud_result)})
-        return result
+            return None
+        return ChatThreadModel(**crud_result)
 
     async def get_one_by_name(
             self,
             name: str
-    ) -> dict[str, str | ChatThreadModel]:
-        result: dict = {
-            "success": False,
-            "message": "",
-            "error": "",
-            "data": {}
-        }
+    ) -> ChatThreadModel | None:
         self._logger.info(f"Retrieving document with name: {name}")
         try:
             crud_result = await self._collection.find_one({"chat_name": name})
-            result.update({"success": True, "message": "Chat history retrieved successfully", "data": ChatThreadModel(**crud_result)})
         except Exception as e:
-            result.update({"success": False, "message": "Chat history retrieval failed", "error": str(e)})
             self._logger.error(f"Retrieving document error: {e}")
-        return result
+            return None
+        if crud_result is None:
+            return None
+        return ChatThreadModel(**crud_result)
 
-    async def get_all(self) -> dict[str, str | list[ChatThreadModel]]:
-        result: dict = {
-            "success": False,
-            "message": "",
-            "error": "",
-            "data": {}
-        }
-        try:
-            crud_results = self._collection.find()
-            if crud_results is None:
-                result.update({"success": False, "message": "No chat history found"})
-                return result
-            result.update({"success": True, "message": "Chat history retrieved successfully", "data": [ChatThreadModel(**result) async for result in crud_results]})
-        except Exception as e:
-            result.update({"success": False, "message": "Chat history retrieval failed", "error": str(e)})
-            self._logger.error(e)
-        return result
+    async def get_all(self):
+        raise NotImplementedError
 
     async def get_all_by_user_id(
             self,
             user_id: str
-    ) -> dict:
-        result: dict = {
-            "success": False,
-            "message": "",
-            "error": "",
-            "data": []
-        }
+    ) -> list[ChatThreadModel] | None:
+        crud_results: any
         try:
             crud_results = self._collection.find({"user_id": user_id})
-            if crud_results is None:
-                result.update({"success": False, "message": "Herhangi bir sohbet bulunamadı"})
-                return result
-            result.update({"success": True, "message": "Sohbetler başarıyla getirildi.",
-                           "data": [ChatThreadModel(**result).model_dump() async for result in crud_results]})
         except Exception as e:
-            result.update({"success": False, "message": "Sohbetlerin getirilmesi esnasında bir hata oluştu",
-                           "error": str(e)})
-            self._logger.error(e)
-        return result
+            self._logger.error(f"Retrieving documents error: {e}")
+        if crud_results is None:
+            return None
+        chat_threads: list[ChatThreadModel] = []
+        async for chat_thread in crud_results:
+            chat_threads.append(ChatThreadModel(**chat_thread))
+        return chat_threads
 
     async def update_one(
             self,
             chat_history: ChatThreadModel
-    ) -> dict:
-        result: dict = {
-            "success": False,
-            "message": "",
-            "error": ""
-        }
+    ) -> bool:
         try:
             await self._collection.update_one(
                 {"chat_id": chat_history.chat_id},
                 {"$set": chat_history.model_dump()})
-            result.update({"success": True, "message": "Sohbet başarıyla güncellendi."})
+            return True
         except Exception as e:
-            result.update({"success": False, "message": "Sohbet güncellenirken bir hata meydana geldi",
-                           "error": str(e)})
             self._logger.error(f"An error occurred during updating chat.: {e}")
-            return result
-        return result
+            return False
 
     async def update_many(
             self,
@@ -191,107 +139,81 @@ class ContextRepository(MongoDBRepositoryBase):
     async def delete_one(
             self,
             chat_history: ChatThreadModel
-    ) -> dict:
-        result: dict = {
-            "success": False,
-            "message": "",
-            "error": ""
-        }
+    ) -> bool:
         self._logger.info(f"Deleting document with id: {chat_history.chat_id}")
         try:
-            await self._collection.delete_one({"chat_id": chat_history.chat_id})
-            result.update({"success": True, "message": "Chat history deleted successfully"})
+            crud_result: any = await self._collection.delete_one({"chat_id": chat_history.chat_id})
+            if crud_result.deleted_count > 0:
+                self._logger.info(f"Chat with id: {chat_history.chat_id} deleted successfully")
+                return True
+            else:
+                self._logger.warn(f"Chat with id: {chat_history.chat_id} not found")
+                return False
         except Exception as e:
-            result.update({"success": False, "message": "Chat history deletion failed", "error": str(e)})
             self._logger.error(f"An error occured: {e}")
-        return result
+            return False
 
     async def delete_one_by_id(
             self,
             chat_id: str
-    ) -> dict:
-        result: dict = {
-            "success": False,
-            "message": "",
-            "error": ""
-        }
+    ) -> bool:
         try:
-            crud_result = await self._collection.delete_one({"chat_id": chat_id})
+            crud_result: any = await self._collection.delete_one({"chat_id": chat_id})
             if crud_result.deleted_count > 0:
-                result.update({"success": True, "message": "Sohbet başarıyla silindi."})
+                self._logger.info(f"Chat with id: {chat_id} deleted successfully")
+                return True
             else:
-                result.update({"success": False, "message": "Böyle bir sohbet bulunamadı."})
+                self._logger.warn(f"Chat with id: {chat_id} not found")
+                return False
         except Exception as e:
-            result.update({"success": False, "message": "Sohbet silinirken bir hata oluştu.", "error": str(e)})
-            self._logger.error(e)
-
-        return result
+            self._logger.error(f"An error occurred during deletion: {e}")
+            return False
 
     async def delete_many_by_id(
             self,
             ids: list
-    ) -> dict:
-        result: dict = {
-            "success": False,
-            "message": "",
-            "error": ""
-        }
+    ) -> bool:
         try:
             crud_result = await self._collection.delete_many({"chat_id": {"$in": ids}})
-            result.update({"success": True, "message": "Chat history deleted successfully"})
+            if crud_result.deleted_count > 0:
+                self._logger.info(f"Chat with ids: {ids} deleted successfully")
+                return True
+            else:
+                self._logger.warn(f"Chat with ids: {ids} not found")
+                return False
         except Exception as e:
-            result.update({"error": str(e)})
-            self._logger.error(e)
-            raise Exception(e)
-
-        if crud_result.deleted_count > 0:
-            result.update({"success": True, "message": "Chat history deleted successfully"})
-        else:
-            result.update({"success": False, "message": "Something went wrong"})
-        return result
+            self._logger.error(f"An error occurred during deletion: {e}")
+            return False
 
     async def delete_all_by_user_id(
             self,
             user_id: str
-    ) -> dict:
-        result: dict = {
-            "success": False,
-            "message": "",
-            "error": ""
-        }
+    ) -> bool:
         self._logger.info(f"Deleting all chat histories for user_id: {user_id}")
         try:
             crud_result = await self._collection.delete_many({"user_id": user_id})
             if crud_result.deleted_count > 0:
-                result.update({"success": True, "message": "Bütün sohbetler başarılı bir şekilde silindi."})
+                return True
             else:
-                result.update({"success": False, "message": "Bu kullanıcıya bağlı herhangi bir sohbet geçmişi bulunamadı"})
+                return False
         except Exception as e:
-            result.update({"success": False, "message": "Sohbetler silinirken bir hata meydana geldi.",
-                           "error": str(e)})
             self._logger.error(f"An error occurred: {e}")
-        return result
+            return False
 
     async def get_chat_history(
             self,
             chat_id: str
-    ) -> dict:
-        result: dict = {
-            "success": False,
-            "message": "",
-            "error": "",
-            "data": {}
-        }
+    ) -> list[MessageModel]:
         self._logger.info(f"Retrieving chat history for chat_id: {chat_id}")
         try:
             crud_result = await self._collection.find_one({"chat_id": chat_id})
-            if crud_result is None:
-                result.update({"success": False, "message": "Sohbet geçmişi bulunamadı."})
-                return result
-            result.update({"success": True, "message": "Sohbet geçmişi başarıyla getirildi.",
-                           "data": {"chat_history": crud_result.get("history")}})
         except Exception as e:
-            result.update({"success": False, "message": "Sohbet geçmişi getirilirken bir hata oluştu.",
-                           "error": str(e)})
-            self._logger.error(e)
-        return result
+            self._logger.error(f"Retrieving chat history error: {e}")
+            return []
+        if crud_result is None:
+            self._logger.warn(f"No chat history found for chat_id: {chat_id}")
+            return []
+        chat_history: list[MessageModel] = []
+        async for message in crud_result.get("messages", []):
+            chat_history.append(MessageModel(**message))
+        return chat_history

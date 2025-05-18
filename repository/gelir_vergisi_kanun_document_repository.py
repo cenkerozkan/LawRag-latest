@@ -3,14 +3,13 @@ import uuid
 from util.logger import get_logger
 from base.document_repository_base import DocumentRepositoryBase
 from config.config import CHUNK_SIZE
-from config.config import DOC_REPO_RESULT_K
 from langchain_community.vectorstores import FAISS
 from langchain_cohere.embeddings import CohereEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-class {{ClassName}}(DocumentRepositoryBase):
+class GelirVergisiKanunDocumentRepository(DocumentRepositoryBase):
     def __init__(
             self,
             file_path: str
@@ -18,7 +17,7 @@ class {{ClassName}}(DocumentRepositoryBase):
         super().__init__()
         self._ids: list = []
         self._logger = get_logger(__name__)
-        self._logger.info(f"Initializing {{name}} Document Repository")
+        self._logger.info(f"Initializing gelir_vergisi_kanun Document Repository")
 
         self._logger.info(f"Loading documents from file: {file_path}")
         self._loader = PyPDFLoader(file_path)
@@ -46,11 +45,11 @@ class {{ClassName}}(DocumentRepositoryBase):
             return False
         return True
 
-        async def aretrieve(
+    async def aretrieve(
             self,
             query: str
     ) -> str:
         self._logger.info(f"Retrieving documents for query: {query}")
         docs = await self._db.asimilarity_search(query=query, filter={"source": {"$eq": self.__class__.__name__}})
-        top_docs_content = "\n".join([doc.page_content for doc in docs[:DOC_REPO_RESULT_K]])
+        top_docs_content = "\n".join([doc.page_content for doc in docs[:5]])
         return str(f"{self.__class__.__name__} RAG Context\n" + top_docs_content)

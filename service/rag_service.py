@@ -6,12 +6,29 @@ import sys
 from starlette.concurrency import run_in_threadpool
 from google import genai
 
+# DOC REPOS.
+from repository.hukuk_muhakemeleri_kanun_document_repository import HukukMuhakemeleriKanunDocumentRepository  # DEFAULT
+from repository.icra_ve_iflas_kanun_document_repository import IcraVeIflasKanunDocumentRepository   # DEFAULT
+from repository.idari_yargilama_usulu_kanun_document_repository import IdariYargilamaUsuluKanunDocumentRepository # DEFAULT
+from repository.turk_anayasasi_document_repository import TurkAnayasasiDocumentRepository # DEFAULT
+from repository.is_isci_kanun_document_repository import IsIsciKanunDocumentRepository
+from repository.borclar_kanun_document_repository import BorclarKanunDocumentRepository
+from repository.sinai_mulkiyet_kanun_document_repository import SinaiMulkiyetKanunDocumentRepository
+from repository.turk_ceza_kanun_document_repository import TurkCezaKanunDocumentRepository
+from repository.rekabetin_korunmasi_kanun_document_repository import RekabetinKorunmasiKanunDocumentRepository
+from repository.vergi_usul_kanun_document_repository import VergiUsulKanunDocumentRepository
+from repository.ceza_muhakeme_kanun_document_repository import CezaMuhakemeKanunDocumentRepository
+from repository.elektronik_ticaretin_duzenlenmesi_kanun_document_repository import ElektronikTicaretinDuzenlenmesiKanunDocumentRepository
+from repository.gelir_vergisi_kanun_document_repository import GelirVergisiKanunDocumentRepository
+from repository.infaz_kanun_document_repository import InfazKanunDocumentRepository
+from repository.kabahatler_kanun_document_repository import KabahatlerKanunDocumentRepository
+from repository.kvkk_kanun_document_repository import KvkkKanunDocumentRepository
+from repository.medeni_kanun_document_repository import MedeniKanunDocumentRepository
+from repository.tuketicinin_korunmasi_kanun_document_repository import TuketicininKorunmasiKanunDocumentRepository
+from repository.turk_ticaret_kanun_document_repository import TurkTicaretKanunDocumentRepository
+
 from db.model.chat_thread_model import ChatThreadModel
 from db.model.message_model import MessageModel
-from repository.worker_laws_document_repository import WorkerLawsDocumentRepository
-from repository.obligations_laws_document_repository import ObligationsLawsDocumentRepository
-from repository.industrial_property_laws_document_repository import IndustrialPropertyLawsDocumentRepository
-from repository.turkish_criminal_law_document_repository_document_repository import TurkishCriminalLawDocumentRepository
 from repository.context_repository import ContextRepository
 from util.pdf_selector import PdfSelector
 from util.logger import get_logger
@@ -23,10 +40,20 @@ from config.config import MESSAGE_HISTORY_SIZE
 # This is for making document retrieval much more easy.
 # Change the lookup table to use the repository instances
 _LOOKUP_TABLE: dict = {
-    "is_isci_kanun": lambda self, query: self._worker_laws_repository.aretrieve(query),
-    "borclar_kanun": lambda self, query: self._obligations_laws_repository.aretrieve(query),
-    "sinai_mulkiyet_kanun": lambda self, query: self._industrial_property_laws_repository.aretrieve(query),
-    "turk_ceza_kanun": lambda self, query: self._turkish_criminal_law_repository.aretrieve(query)
+    "is_isci_kanun": lambda self, query: self._is_isci_kanun_repository.aretrieve(query),
+    "borclar_kanun": lambda self, query: self._borclar_kanun_repository.aretrieve(query),
+    "sinai_mulkiyet_kanun": lambda self, query: self._sinai_mulkiyet_kanun_repository.aretrieve(query),
+    "turk_ceza_kanun": lambda self, query: self._turk_ceza_kanun_repository.aretrieve(query),
+    "ceza_muhakeme_kanun": lambda self, query: self._ceza_muhakeme_kanun_repository.aretrieve(query),
+    "elektronik_ticaretin_duzenlenmesi_hakkinda_kanun": lambda self, query: self._elektronik_ticaretin_duzenlenmesi_kanun_repository.aretrieve(query),
+    "gelir_vergisi_kanunu": lambda self, query: self._gelir_vergisi_kanun_repository.aretrieve(query),
+    "infaz_kanun": lambda self, query: self._infaz_kanun_repository.aretrieve(query),
+    "kvkk_kanun": lambda self, query: self._kvkk_kanun_repository.aretrieve(query),
+    "medeni_kanun": lambda self, query: self._medeni_kanun_repository.aretrieve(query),
+    "rekabet_kanun": lambda self, query: self._rekabetin_korunmasi_kanun_repository.aretrieve(query),
+    "tuketici_kanun": lambda self, query: self._tuketicinin_korunmasi_kanun_repository.aretrieve(query),
+    "turk_ticaret_kanun": lambda self, query: self._turk_ticaret_kanun_repository.aretrieve(query),
+    "vergi_usul_kanun": lambda self, query: self._vergi_usul_kanun_repository.aretrieve(query),
 }
 
 class RagService:
@@ -41,16 +68,50 @@ class RagService:
             self._context_repository = ContextRepository()
 
             # Document repositories injection.
-            self._worker_laws_repository = WorkerLawsDocumentRepository(file_path="./pdf/is_isci_kanun.pdf")
-            self._obligations_laws_repository = ObligationsLawsDocumentRepository(file_path="./pdf/borclar_kanun.pdf")
-            self._industrial_property_laws_repository = IndustrialPropertyLawsDocumentRepository(file_path="./pdf/sinai_mulkiyet_kanun.pdf")
-            self._turkish_criminal_law_repository = TurkishCriminalLawDocumentRepository(file_path="./pdf/turk_ceza_kanun.pdf")
+            self._hukuk_muhakemeleri_kanun_repository = HukukMuhakemeleriKanunDocumentRepository(file_path="./pdf/hukuk_muhakemeleri_kanun.pdf") # DEFAULT
+            self._icra_ve_iflas_kanun_repository = IcraVeIflasKanunDocumentRepository(file_path="./pdf/icra_ve_iflas_kanun.pdf") # DEFAULT
+            self._idari_yargilama_usulu_kanun_repository = IdariYargilamaUsuluKanunDocumentRepository(file_path="./pdf/idari_yargilama_usulu_kanun.pdf") # DEFAULT
+            self._turk_anayasasi_repository = TurkAnayasasiDocumentRepository(file_path="./pdf/turk_anayasasi.pdf") # DEFAULT
+            self._is_isci_kanun_repository = IsIsciKanunDocumentRepository(file_path="./pdf/is_isci_kanun.pdf")
+            self._borclar_kanun_repository = BorclarKanunDocumentRepository(file_path="./pdf/borclar_kanun.pdf")
+            self._sinai_mulkiyet_kanun_repository = SinaiMulkiyetKanunDocumentRepository(file_path="./pdf/sinai_mulkiyet_kanun.pdf")
+            self._turk_ceza_kanun_repository = TurkCezaKanunDocumentRepository(file_path="./pdf/turk_ceza_kanun.pdf")
+            # BREAKPOINT
+            self._rekabetin_korunmasi_kanun_repository = RekabetinKorunmasiKanunDocumentRepository(file_path="./pdf/rekabetin_korunmasi_hakkinda_kanun.pdf")
+            self._vergi_usul_kanun_repository = VergiUsulKanunDocumentRepository(file_path="./pdf/vergi_usul_kanun.pdf")
+            self._ceza_muhakeme_kanun_repository = CezaMuhakemeKanunDocumentRepository(file_path="./pdf/ceza_muhakeme_kanun.pdf")
+            self._elektronik_ticaretin_duzenlenmesi_kanun_repository = ElektronikTicaretinDuzenlenmesiKanunDocumentRepository(file_path="./pdf/elektronik_ticaretin_duzenlenmesi_hakkinda_kanun.pdf")
+            self._gelir_vergisi_kanun_repository = GelirVergisiKanunDocumentRepository(file_path="./pdf/gelir_vergisi_kanunu.pdf")
+            self._infaz_kanun_repository = InfazKanunDocumentRepository(file_path="./pdf/infaz_kanun.pdf")
+            self._kabahatler_kanun_repository = KabahatlerKanunDocumentRepository(file_path="./pdf/kabahatler_kanun.pdf")
+            self._kvkk_kanun_repository = KvkkKanunDocumentRepository(file_path="./pdf/kvkk_kanun.pdf")
+            self._medeni_kanun_repository = MedeniKanunDocumentRepository(file_path="./pdf/medeni_kanun.pdf")
+            self._tuketicinin_korunmasi_kanun_repository = TuketicininKorunmasiKanunDocumentRepository(file_path="./pdf/tuketicinin_korunmasi_hakkinda_kanun.pdf")
+            self._turk_ticaret_kanun_repository = TurkTicaretKanunDocumentRepository(file_path="./pdf/turk_ticaret_kanun.pdf")
+
 
             # Initialize the document repositories.
-            #self._worker_laws_repository.init_documents()
-            #self._obligations_laws_repository.init_documents()
-            #self._industrial_property_laws_repository.init_documents()
-            #self._turkish_criminal_law_repository.init_documents()
+            self._hukuk_muhakemeleri_kanun_repository.init_documents()
+            self._icra_ve_iflas_kanun_repository.init_documents()
+            self._idari_yargilama_usulu_kanun_repository.init_documents()
+            self._turk_anayasasi_repository.init_documents()
+            self._is_isci_kanun_repository.init_documents()
+            self._borclar_kanun_repository.init_documents()
+            self._sinai_mulkiyet_kanun_repository.init_documents()
+            self._turk_ceza_kanun_repository.init_documents()
+            self._rekabetin_korunmasi_kanun_repository.init_documents()
+            self._ceza_muhakeme_kanun_repository.init_documents()
+            self._elektronik_ticaretin_duzenlenmesi_kanun_repository.init_documents()
+            self._gelir_vergisi_kanun_repository.init_documents()
+            self._infaz_kanun_repository.init_documents()
+            self._kabahatler_kanun_repository.init_documents()
+            self._kvkk_kanun_repository.init_documents()
+            self._medeni_kanun_repository.init_documents()
+            self._tuketicinin_korunmasi_kanun_repository.init_documents()
+            self._turk_ticaret_kanun_repository.init_documents()
+
+
+
 
         except Exception as e:
             self._logger.error(f"Error initializing RagService: {e}")
@@ -92,11 +153,19 @@ class RagService:
                 search_query = hyde_data if hyde_result["success"] else query
                 self._logger.info(f"Using {'HyDE' if hyde_result['success'] else 'original'} query: {search_query}")
 
+
             for pdf in pdfs:
                 if pdf in _LOOKUP_TABLE:
                     retrieval_result = await _LOOKUP_TABLE[pdf](self, search_query)
                     self._logger.info(f"{pdf} result: {retrieval_result}")
                     result += retrieval_result
+
+            # Retrieve defaults.
+            hukuk_muhakeme_result: str = await self._hukuk_muhakemeleri_kanun_repository.aretrieve(search_query)
+            icra_ve_iflas_result: str = await self._icra_ve_iflas_kanun_repository.aretrieve(search_query)
+            idari_yargilama_result: str = await self._idari_yargilama_usulu_kanun_repository.aretrieve(search_query)
+            turk_anayasasi_result: str = await self._turk_anayasasi_repository.aretrieve(search_query)
+            result += hukuk_muhakeme_result + icra_ve_iflas_result + idari_yargilama_result + turk_anayasasi_result
 
         except Exception as e:
             self._logger.error(f"Error retrieving rag: {e}")

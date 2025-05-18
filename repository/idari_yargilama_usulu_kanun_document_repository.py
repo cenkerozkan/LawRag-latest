@@ -10,7 +10,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-class {{ClassName}}(DocumentRepositoryBase):
+class IdariYargilamaUsuluKanunDocumentRepository(DocumentRepositoryBase):
     def __init__(
             self,
             file_path: str
@@ -18,7 +18,7 @@ class {{ClassName}}(DocumentRepositoryBase):
         super().__init__()
         self._ids: list = []
         self._logger = get_logger(__name__)
-        self._logger.info(f"Initializing {{name}} Document Repository")
+        self._logger.info(f"Initializing idari_yargilama_usulu_kanun Document Repository")
 
         self._logger.info(f"Loading documents from file: {file_path}")
         self._loader = PyPDFLoader(file_path)
@@ -46,7 +46,7 @@ class {{ClassName}}(DocumentRepositoryBase):
             return False
         return True
 
-        async def aretrieve(
+    async def aretrieve(
             self,
             query: str
     ) -> str:

@@ -3,19 +3,22 @@ import uuid
 from util.logger import get_logger
 from base.document_repository_base import DocumentRepositoryBase
 from config.config import CHUNK_SIZE
+from config.config import DOC_REPO_RESULT_K
 from langchain_community.vectorstores import FAISS
 from langchain_cohere.embeddings import CohereEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-# worker_laws_document_repository.py
-class WorkerLawsDocumentRepository(DocumentRepositoryBase):
-    def __init__(self, file_path: str):
+class TurkCezaKanunDocumentRepository(DocumentRepositoryBase):
+    def __init__(
+            self,
+            file_path: str
+    ):
         super().__init__()
         self._ids: list = []
         self._logger = get_logger(__name__)
-        self._logger.info(f"Initializing is_isci_kanunlari Document Repository")
+        self._logger.info(f"Initializing turk_ceza_kanun Document Repository")
 
         self._logger.info(f"Loading documents from file: {file_path}")
         self._loader = PyPDFLoader(file_path)
@@ -43,12 +46,11 @@ class WorkerLawsDocumentRepository(DocumentRepositoryBase):
             return False
         return True
 
-    async def aretrieve(self, query: str) -> str:
+    async def aretrieve(
+            self,
+            query: str
+    ) -> str:
         self._logger.info(f"Retrieving documents for query: {query}")
         docs = await self._db.asimilarity_search(query=query, filter={"source": {"$eq": self.__class__.__name__}})
-
-        # Take up to first 4 documents and combine their content
-        contents = [doc.page_content for doc in docs[:4]]
-        combined_content = "\n".join(contents)
-
-        return f"{self.__class__.__name__} RAG Context\n{combined_content}"
+        top_docs_content = "\n".join([doc.page_content for doc in docs[:DOC_REPO_RESULT_K]])
+        return str(f"{self.__class__.__name__} RAG Context\n" + top_docs_content)

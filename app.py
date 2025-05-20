@@ -12,6 +12,7 @@ from response_model.response_model import ResponseModel
 
 from route.rag_routes import rag_router
 from route.chat_thread_routes import chat_thread_router
+from route.internal_routes import internal_router
 
 load_dotenv()
 logger = get_logger(__name__)
@@ -21,8 +22,8 @@ logger = get_logger(__name__)
 async def lifespan(app: FastAPI):
     logger.info("Starting PDF download from Supabase...")
     supabase_service = SupabasePdfDownloader()
-    downloaded_pdfs = await supabase_service.download_pdfs()
-    logger.info(f"Downloaded {len(downloaded_pdfs)} PDFs to pdf directory")
+    #downloaded_pdfs = await supabase_service.download_pdfs()
+    #logger.info(f"Downloaded {len(downloaded_pdfs)} PDFs to pdf directory")
 
     yield
     logger.info("Application shutting down...")
@@ -65,6 +66,7 @@ async def http_exception_handler(
 
 app.include_router(rag_router)
 app.include_router(chat_thread_router)
+app.include_router(internal_router)
 
 
 @app.get("/")

@@ -16,10 +16,10 @@ def extract_text_from_pdf(pdf_path: str) -> str:
     """
     # Create a PDF reader object
     try:
-        reader = PdfReader(pdf_path)
+        reader: PdfReader = PdfReader(pdf_path)
 
         # Initialize an empty string to store all text
-        full_text = ""
+        full_text: str = ""
 
         # Iterate through all pages and extract text
         for page in reader.pages:
@@ -28,8 +28,10 @@ def extract_text_from_pdf(pdf_path: str) -> str:
         return full_text.strip()
 
     except FileNotFoundError:
+        logger.error(f"File not found: {pdf_path}")
         return f"Error: The file '{pdf_path}' was not found."
     except Exception as e:
+        logger.error(f"Error processing PDF: {e}")
         return f"Error occurred while processing the PDF: {str(e)}"
 
 

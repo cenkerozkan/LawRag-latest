@@ -8,7 +8,7 @@ from util.logger import get_logger
 from service.chat_thread_service import chat_thread_service
 
 logger = get_logger(__name__)
-chat_thread_router = APIRouter(prefix="/chat_service", tags=["Chat Thread Service"])
+chat_thread_router = APIRouter(prefix="/api/chat_service", tags=["Chat Thread Service"])
 security = HTTPBearer()
 
 @chat_thread_router.post("/create", tags=["Chat Thread Service"])

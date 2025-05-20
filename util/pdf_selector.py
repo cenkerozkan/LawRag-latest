@@ -4,38 +4,43 @@ from langchain_chroma import Chroma
 from langchain_core.example_selectors import SemanticSimilarityExampleSelector
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_cohere import CohereEmbeddings
 
 
 from meta.singleton import Singleton
 from util.logger import get_logger
+from util.embedding_model_getter import get_embedding_model
 
 
 class PdfSelector(metaclass=Singleton):
     def __init__(self):
+        self._model = get_embedding_model("cohere-light")
         self._examples: list = [
+
             # İŞÇİ KANUNU
-            {"input": "tazminatsız", "output": "is_isci_kanun"},
-            {"input": "fazla mesai", "output": "is_isci_kanun"},
-            {"input": "yıllık izin", "output": "is_isci_kanun"},
-            {"input": "iş kazası", "output": "is_isci_kanun"},
-            {"input": "sendika", "output": "is_isci_kanun"},
-            {"input": "kıdem tazminatı", "output": "is_isci_kanun"},
-            {"input": "ihbar süresi", "output": "is_isci_kanun"},
-            {"input": "doğum izni", "output": "is_isci_kanun"},
-            {"input": "hafta tatili", "output": "is_isci_kanun"},
-            {"input": "iş sözleşmesi", "output": "is_isci_kanun"},
+            {"input": "İşçi hakları", "output": "is_isci_kanun"},
+            {"input": "İş yeri", "output": "is_isci_kanun"},
+            {"input": "İş sözleşmesi", "output": "is_isci_kanun"},
+            {"input": "Kıdem tazminatı", "output": "is_isci_kanun"},
+            {"input": "İhbar tazminatı", "output": "is_isci_kanun"},
+            {"input": "Fazla mesai ücreti", "output": "is_isci_kanun"},
+            {"input": "İş güvencesi", "output": "is_isci_kanun"},
+            {"input": "Sendikal haklar", "output": "is_isci_kanun"},
+            {"input": "İş kazası tazminatı", "output": "is_isci_kanun"},
+            {"input": "Yıllık izin hakkı", "output": "is_isci_kanun"},
+            {"input": "Asgari ücret", "output": "is_isci_kanun"},
 
             # BORÇLAR KANUNU
-            {"input": "kira sözleşmesi", "output": "borclar_kanun"},
-            {"input": "borçlu", "output": "borclar_kanun"},
-            {"input": "haksız fiil", "output": "borclar_kanun"},
-            {"input": "sebepsiz zenginleşme", "output": "borclar_kanun"},
-            {"input": "cezai şart", "output": "borclar_kanun"},
-            {"input": "müteselsil borç", "output": "borclar_kanun"},
-            {"input": "kira artış", "output": "borclar_kanun"},
-            {"input": "alacaklı", "output": "borclar_kanun"},
-            {"input": "sözleşme feshi", "output": "borclar_kanun"},
-            {"input": "temerrüt faizi", "output": "borclar_kanun"},
+            {"input": "Borçlar hukuku", "output": "borclar_kanun"},
+            {"input": "Müteselsil borç", "output": "borclar_kanun"},
+            {"input": "Sözleşmeden doğan borçlar", "output": "borclar_kanun"},
+            {"input": "Haksız fiil", "output": "borclar_kanun"},
+            {"input": "Sebepsiz zenginleşme", "output": "borclar_kanun"},
+            {"input": "Kira sözleşmesi", "output": "borclar_kanun"},
+            {"input": "Kira artışı", "output": "borclar_kanun"},
+            {"input": "Borçlu ve alacaklı hakları", "output": "borclar_kanun"},
+            {"input": "Tazminat yükümlülükleri", "output": "borclar_kanun"},
+            {"input": "Sorumluluk halleri", "output": "borclar_kanun"},
 
             # SİNAİ MÜLKİYET KANUNU
             {"input": "marka tescili", "output": "sinai_mulkiyet_kanun"},
@@ -148,8 +153,7 @@ class PdfSelector(metaclass=Singleton):
         self._logger = get_logger(__name__)
         self._example_selector = SemanticSimilarityExampleSelector.from_examples(
             self._examples,
-            GoogleGenerativeAIEmbeddings(model="models/text-embedding-004",
-                                         google_api_key=os.getenv("GEMINI_API_KEY")),
+            CohereEmbeddings(model=self._model),
             InMemoryVectorStore,
             k=5
         )

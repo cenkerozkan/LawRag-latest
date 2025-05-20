@@ -10,7 +10,7 @@ from service.rag_service import rag_service
 from service.chat_thread_service import chat_thread_service
 
 logger = get_logger(__name__)
-rag_router = APIRouter(prefix="/rag", tags=["RAG Service"])
+rag_router = APIRouter(prefix="/api/rag", tags=["RAG Service"])
 security = HTTPBearer()
 
 @rag_router.post("/query", tags=["RAG Service"])
@@ -20,7 +20,6 @@ async def query_rag(
 ) -> JSONResponse:
     logger.info(f"RAG query request for chat: {rag_request.chat_id}")
     service_result: ChatThreadModel = await chat_thread_service.retrieve_chat_thread(rag_request.chat_id)
-    logger.info(f"Chat thread: {service_result}")
     if not service_result.get("success"):
         return JSONResponse(
             status_code=500,

@@ -237,7 +237,7 @@ class RagService:
         if web_search:
             web_search_results = await self._retrieve_web_search_content(query, contents)
             contents.extend([str(result) for result in web_search_results])
-            web_sources = [result.get("page_url", "") for result in web_search_results]
+            web_sources = [result.get("page_url", "") for result in web_search_results if result is not None]
 
         # Generate content with Gemini.
         try:

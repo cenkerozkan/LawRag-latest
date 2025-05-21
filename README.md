@@ -78,427 +78,240 @@ A Retrieval-Augmented Generation (RAG) project using LangChain with MongoDB for 
 
 
 
-## 📚 API Documentation
+# HakMate RAG – Backend Integration Guide for Mobile Developers
 
-### Authorization
+Welcome to **HakMate RAG**!  
+This service is the backbone of HakMate's retrieval-augmented generation, chat context, and PDF legal document enrichment. This guide is tailored for mobile developers to understand how to interact with the backend, including the underlying data models, endpoints, and flows.
 
-All endpoints require Bearer token authentication:
+---
 
-```http
-Authorization: Bearer <token>
+## Table of Contents
+
+- [General Architecture](#general-architecture)
+- [Data Models](#data-models)
+- [Base URL & Authentication](#base-url--authentication)
+- [API Endpoints](#api-endpoints)
+  - [Chat Thread Service](#chat-thread-service)
+  - [RAG Query Service](#rag-query-service)
+  - [Internal PDF Processing Service](#internal-pdf-processing-service)
+- [Request & Response Models](#request--response-models)
+- [Typical Flows](#typical-flows)
+- [Development & Contact Notes](#development--contact-notes)
+
+---
+
+## General Architecture
+
+- **Framework:** FastAPI (async RESTful)
+- **Data Store:** MongoDB (for chat threads, messages, PDF content)
+- **Main Capabilities:**  
+  - Chat thread management (create, update, delete, list, history)
+  - AI-powered question answering with legal document retrieval & web search
+  - PDF ingestion & processing
+- **Connected to:**  
+  - Supabase (for PDF storage)
+  - Google Gemini (for AI completions)
+  - Internal Python modules (for PDF extraction, retrieval, etc.)
+
+---
+
+## Data Models
+
+### ChatThreadModel
+
+```python
+class ChatThreadModel(BaseModel):
+    chat_name: str
+    chat_id: str                   # UUID
+    user_id: str                   # UUID
+    anonymous_user_id: str | None  # UUID
+    created_at: str
+    updated_at: str
+    pdf_content: list[PdfContentModel] = []
+    history: list[MessageModel]
+```
+
+### MessageModel
+
+```python
+class MessageModel(BaseModel):
+    created_at: str
+    role: str                      # "user" or "ai"
+    content: str
+    web_sources: list[str] | None = None
+```
+
+### PdfContentModel
+
+```python
+class PdfContentModel(BaseModel):
+    file_name: str
+    file_content: str              # Extracted text from PDF
 ```
 
 ---
 
-## Global Error Handling
+## Base URL & Authentication
 
-The API implements global exception handling for HTTP errors. All error responses follow the `ResponseModel` format:
+- **Base URL:**  
+  e.g., `http://localhost:8000/api`
 
-| Status Code | Message                |
-| ----------- | ---------------------- |
-| 404         | Not found              |
-| 401         | Unauthorized           |
-| 403         | Not authenticated      |
-| 500         | Internal server error  |
+- **Authentication:**  
+  All endpoints require `Authorization: Bearer <JWT_TOKEN>` in the headers.
 
-**Example Error Response:**
+---
+
+## API Endpoints
+
+### Chat Thread Service
+
+Prefix: `/api/chat_service`
+
+| Endpoint                | Method | Description                                 | Body / Params                                      |
+|-------------------------|--------|---------------------------------------------|-----------------------------------------------------|
+| `/create`               | POST   | Create chat thread                          | `chat_name`, `user_id`, (optional) `anonymous_user_id` |
+| `/delete/{chat_id}`     | DELETE | Delete chat thread                          | URL param: `chat_id`                                 |
+| `/get_all_chat_threads/{user_id}` | GET | List all chat threads for a user           | URL param: `user_id`                                 |
+| `/get_chat_history/{chat_id}`     | GET | Get chat history for a thread              | URL param: `chat_id`                                 |
+| `/delete_all_chat_histories/{user_id}` | DELETE | Delete all histories for a user        | URL param: `user_id`                                 |
+| `/update_chat_name/{chat_id}/{new_chat_name}` | PATCH | Rename a chat thread           | URL params: `chat_id`, `new_chat_name`               |
+
+---
+
+### RAG Query Service
+
+Prefix: `/api/rag`
+
+| Endpoint   | Method | Description                                          | Body                               |
+|------------|--------|------------------------------------------------------|-------------------------------------|
+| `/query`   | POST   | Make a question/ask to the legal RAG system         | `chat_id`, `user_id`, `query`, optional `web_search: bool` |
+
+- **Request Body Example:**
+  ```json
+  {
+    "chat_id": "abc123",
+    "user_id": "xyz456",
+    "query": "Boşanma davası için hangi evraklar gerekir?",
+    "web_search": false
+  }
+  ```
+
+- _RAG service uses chat context, retrieves legal docs, and (optionally) augments with web search before generating an answer._
+
+---
+
+### Internal PDF Processing Service
+
+Prefix: `/api/internal`
+
+| Endpoint          | Method | Description                            | Body                                |
+|-------------------|--------|----------------------------------------|-------------------------------------|
+| `/process_pdf`    | POST   | Trigger PDF download, extract, ingest  | `conversation_id`, `document_id`, `file_path`, `file_name`, `file_type` |
+
+- **Typical Use:**  
+  This endpoint is called by the backend (not the mobile app directly) after a PDF is uploaded and ready to be processed.  
+  The PDF's text is extracted and appended to the relevant chat thread's `pdf_content` array.
+
+---
+
+## Request & Response Models
+
+### Common Response Format
+
+All responses use the following model:
 ```json
 {
-  "success": false,
-  "message": "Not found",
-  "data": {},
+  "success": true,
+  "message": "Your info here",
+  "data": { ... },
   "error": ""
 }
 ```
 
-Other HTTP errors will return the original error message in the `message` field.
+### Example: Creating a Chat Thread
 
----
-
-## Endpoints
-
-### Chat Thread Endpoints
-
-#### Create Chat Thread
-
-`POST /chat_service/create`
-
-**Request Body:**
+**POST** `/api/chat_service/create`
 ```json
 {
-  "chat_name": "string",
-  "user_id": "string",
-  "anonymous_user_id": "string" | null
+  "chat_name": "My First Chat",
+  "user_id": "xyz456",
+  "anonymous_user_id": null
 }
 ```
-
-**Success Response:**
+_Response:_
 ```json
 {
   "success": true,
   "message": "Chat thread created successfully",
-  "data": {
-    "chat": {
-      "chat_name": "string",
-      "chat_id": "string",
-      "user_id": "string",
-      "anonymous_user_id": "string" | null
-      "created_at": "datetime",
-      "updated_at": "datetime",
-      "history": []
-    }
-  },
-  "error": ""
-}
-```
-
-**Error Responses:**
-- 400: Invalid request
-```json
-{
-  "success": false,
-  "message": "Invalid request parameters",
-  "data": {},
-  "error": ""
-}
-```
-- 401: Unauthorized
-```json
-{
-  "success": false,
-  "message": "Unauthorized",
-  "data": {},
-  "error": ""
-}
-```
-- 500: Internal server error
-```json
-{
-  "success": false,
-  "message": "Internal server error",
-  "data": {},
+  "data": { "chat": { ...thread data... } },
   "error": ""
 }
 ```
 
 ---
 
-#### Delete Chat Thread
+### Example: RAG Query
 
-`DELETE /chat_service/delete/{chat_id}`
-
-**Success Response:**
+**POST** `/api/rag/query`
 ```json
 {
-  "success": true,
-  "message": "Chat thread deleted successfully.",
-  "data": {},
-  "error": ""
+  "chat_id": "abc123",
+  "user_id": "xyz456",
+  "query": "Miras paylaşımında izlenecek yol nedir?",
+  "web_search": true
 }
 ```
-
-**Error Responses:**
-- 404: Not found
-```json
-{
-  "success": false,
-  "message": "Chat thread not found.",
-  "data": {},
-  "error": "NOT_FOUND"
-}
-```
-- 401: Unauthorized
-```json
-{
-  "success": false,
-  "message": "Unauthorized",
-  "data": {},
-  "error": "UNAUTHORIZED"
-}
-```
-- 500: Internal server error
-```json
-{
-  "success": false,
-  "message": "Internal server error",
-  "data": {},
-  "error": "INTERNAL_ERROR"
-}
-```
-
----
-
-#### Get All Chat Threads
-
-`GET /chat_service/get_all_chat_threads/{user_id}`
-
-**Success Response:**
-```json
-{
-  "success": true,
-  "message": "Chat threads retrieved successfully.",
-  "data": {
-    "threads": [
-      {
-        "chat_name": "string",
-        "chat_id": "string",
-        "user_id": "string",
-        "anonymous_user_id": "string",
-        "created_at": "datetime",
-        "updated_at": "datetime",
-        "history": []
-      }
-    ]
-  },
-  "error": ""
-}
-```
-
-**Error Responses:**
-- 404: Not found
-```json
-{
-  "success": false,
-  "message": "No chat threads found for user.",
-  "data": {},
-  "error": ""
-}
-```
-- 401: Unauthorized
-```json
-{
-  "success": false,
-  "message": "Unauthorized",
-  "data": {},
-  "error": ""
-}
-```
-- 500: Internal server error
-```json
-{
-  "success": false,
-  "message": "Internal server error",
-  "data": {},
-  "error": ""
-}
-```
-
----
-
-#### Get Chat History
-
-`GET /chat_service/get_chat_history/{chat_id}`
-
-**Success Response:**
-```json
-{
-  "success": true,
-  "message": "Chat history retrieved successfully.",
-  "data": {
-    "history": [
-      // List of messages
-    ]
-  },
-  "error": ""
-}
-```
-
-**Error Responses:**
-- 404: Not found
-```json
-{
-  "success": false,
-  "message": "Chat history not found.",
-  "data": {},
-  "error": "NOT_FOUND"
-}
-```
-- 401: Unauthorized
-```json
-{
-  "success": false,
-  "message": "Unauthorized",
-  "data": {},
-  "error": "UNAUTHORIZED"
-}
-```
-- 500: Internal server error
-```json
-{
-  "success": false,
-  "message": "Internal server error",
-  "data": {},
-  "error": "INTERNAL_ERROR"
-}
-```
-
----
-
-#### Delete All Chat Histories
-
-`DELETE /chat_service/delete_all_chat_histories/{user_id}`
-
-**Success Response:**
-```json
-{
-  "success": true,
-  "message": "All chat threads deleted successfully.",
-  "data": {},
-  "error": ""
-}
-```
-
-**Error Responses:**
-- 404: Not found
-```json
-{
-  "success": false,
-  "message": "No chat histories found for user.",
-  "data": {},
-  "error": "NOT_FOUND"
-}
-```
-- 401: Unauthorized
-```json
-{
-  "success": false,
-  "message": "Unauthorized",
-  "data": {},
-  "error": "UNAUTHORIZED"
-}
-```
-- 500: Internal server error
-```json
-{
-  "success": false,
-  "message": "Internal server error",
-  "data": {},
-  "error": "INTERNAL_ERROR"
-}
-```
-
----
-
-#### Update Chat Name
-
-`PATCH /chat_service/update_chat_name/{chat_id}/{new_chat_name}`
-
-**Success Response:**
-```json
-{
-  "success": true,
-  "message": "Chat thread updated successfully.",
-  "data": {
-    "chat": {
-      "chat_name": "string",
-      "chat_id": "string",
-      "user_id": "string",
-      "anonymous_user_id": "string",
-      "created_at": "datetime",
-      "updated_at": "datetime",
-      "history": []
-    }
-  },
-  "error": ""
-}
-```
-
-**Error Responses:**
-- 404: Not found
-```json
-{
-  "success": false,
-  "message": "Chat thread not found.",
-  "data": {},
-  "error": "NOT_FOUND"
-}
-```
-- 401: Unauthorized
-```json
-{
-  "success": false,
-  "message": "Unauthorized",
-  "data": {},
-  "error": "UNAUTHORIZED"
-}
-```
-- 500: Internal server error
-```json
-{
-  "success": false,
-  "message": "Internal server error",
-  "data": {},
-  "error": "INTERNAL_ERROR"
-}
-```
-
----
-
-## Response Format
-
-All endpoints return responses in the following format:
-
-```json
-{
-  "success": "boolean",
-  "message": "string",
-  "data": "object" | {},
-  "error": "string"
-}
-```
-
-### RAG Endpoints
-
-#### Query RAG
-
-`POST /rag/query`
-
-**Request Body:**
-```json
-{
-  "chat_id": "string",
-  "query": "string",
-  "web_search": "boolean"
-}
-```
-
-**Success Response:**
+_Response:_
 ```json
 {
   "success": true,
   "message": "RAG query processed successfully",
   "data": {
-    "response": "string"
+    "response": "Miras paylaşımı için izlenmesi gereken temel adımlar şunlardır: ..."
   },
   "error": ""
 }
 ```
 
-**Error Responses:**
-- 404: Chat thread not found
-```json
-{
-  "success": false,
-  "message": "Böyle bir sohbet bulunamadı.",
-  "data": {},
-  "error": "NOT_FOUND"
-}
-```
-- 401: Unauthorized
-```json
-{
-  "success": false,
-  "message": "Unauthorized",
-  "data": {},
-  "error": "UNAUTHORIZED"
-}
-```
-- 500: Internal server error
-```json
-{
-  "success": false,
-  "message": "Sistemde yaşanan bir aksaklık sebebiyle şu an size yardımcı olamıyorum.",
-  "data": {},
-  "error": "INTERNAL_ERROR"
-}
-```
+---
+
+## Typical Flows
+
+### 1. Start a New Chat
+
+- Use `/api/chat_service/create` to open a new thread and get `chat_id`.
+- Store `chat_id` and associate with your user/session.
+
+### 2. Ask Legal/AI Questions
+
+- Use `/api/rag/query` with the current `chat_id`, `user_id`, and the user's question in `query`.
+- Optionally set `"web_search": true` for up-to-date answers.
+
+### 3. Show or Rename Chat Threads
+
+- List all with `/api/chat_service/get_all_chat_threads/{user_id}`.
+- Rename with `/api/chat_service/update_chat_name/{chat_id}/{new_chat_name}`.
+
+### 4. Show Chat History
+
+- Call `/api/chat_service/get_chat_history/{chat_id}`.
+
+### 5. PDF Upload Flow (FYI)
+
+- The backend will notify the RAG service via `/api/internal/process_pdf` when a PDF is uploaded and ready to be processed.
+- Extracted PDF text is stored in the `pdf_content` array of the relevant chat thread.
+
+---
+
+## Development & Contact Notes
+
+- **Authorization:** All endpoints require a valid JWT via `Authorization: Bearer <token>`.
+- **All routes are under `/api` prefix.**
+- **Error Handling:** Standardized response model; check `"success"` and `"message"` for status.
+- **Swagger:** (Optional, if enabled) You can try endpoints via Swagger UI if backend exposes it.
+- **For feature requests or questions, contact the backend developer.**
+
+---
+
+**Happy coding!**  
+_If you need more technical details or endpoint samples, reach out to the backend dev or check the codebase._

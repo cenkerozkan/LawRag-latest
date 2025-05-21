@@ -31,6 +31,7 @@ from db.model.chat_thread_model import ChatThreadModel
 from db.model.message_model import MessageModel
 from repository.context_repository import ContextRepository
 from util.pdf_selector import PdfSelector
+from agents.pdf_selector_agent import pdf_selector_agent
 from util.logger import get_logger
 from util.prompt_generator import prompt_generator
 from agents.web_search_agent import web_search_agent
@@ -112,7 +113,6 @@ class RagService:
 
 
 
-
         except Exception as e:
             self._logger.error(f"Error initializing RagService: {e}")
 
@@ -121,9 +121,14 @@ class RagService:
             query: str
     ) -> list[str]:
         result: list = []
-
-        result = await self._pdf_selector.aselect({"input": query})
-        self._logger.info(f"Selected pdfs: {result}")
+        # Try agent-based selector first, fallback to legacy selector if error/empty
+        try:
+            result = await self._pdf_selector.aselect_with_agent(query)
+            self._logger.info(f"Selected pdfs (agent): {result}")
+        except Exception as e:
+            self._logger.error(f"PDF selector agent error: {e}")
+            result = await self._pdf_selector.aselect({"input": query})
+            self._logger.info(f"Selected pdfs (legacy): {result}")
 
         return result
 

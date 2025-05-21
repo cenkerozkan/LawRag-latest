@@ -10,6 +10,7 @@ from langchain_cohere import CohereEmbeddings
 from meta.singleton import Singleton
 from util.logger import get_logger
 from util.embedding_model_getter import get_embedding_model
+from agents.pdf_selector_agent import pdf_selector_agent
 
 
 class PdfSelector(metaclass=Singleton):
@@ -172,3 +173,19 @@ class PdfSelector(metaclass=Singleton):
         example_selector_results: list[dict] = await self._example_selector.aselect_examples(question)
         results: list[str] = self._remove_duplicates(example_selector_results)
         return results
+
+    async def aselect_with_agent(
+            self,
+            query: str
+    ) -> list[str]:
+        """
+        Use the PDF Selector Agent (Gemini LLM) for law selection.
+        Falls back to old selector if agent fails.
+        """
+        try:
+            law_keys = await pdf_selector_agent.select_laws(query)
+            return law_keys
+        except Exception as e:
+            self._logger.error(f"PDF Selector Agent failed, falling back to legacy selector: {e}")
+            # Fallback to legacy selector with same output format
+            return await self.aselect({"input": query})

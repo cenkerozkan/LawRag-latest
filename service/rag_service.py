@@ -77,7 +77,6 @@ class RagService:
             self._borclar_kanun_repository = BorclarKanunDocumentRepository(file_path="./pdf/borclar_kanun.pdf")
             self._sinai_mulkiyet_kanun_repository = SinaiMulkiyetKanunDocumentRepository(file_path="./pdf/sinai_mulkiyet_kanun.pdf")
             self._turk_ceza_kanun_repository = TurkCezaKanunDocumentRepository(file_path="./pdf/turk_ceza_kanun.pdf")
-            # BREAKPOINT
             self._rekabetin_korunmasi_kanun_repository = RekabetinKorunmasiKanunDocumentRepository(file_path="./pdf/rekabetin_korunmasi_hakkinda_kanun.pdf")
             self._vergi_usul_kanun_repository = VergiUsulKanunDocumentRepository(file_path="./pdf/vergi_usul_kanun.pdf")
             self._ceza_muhakeme_kanun_repository = CezaMuhakemeKanunDocumentRepository(file_path="./pdf/ceza_muhakeme_kanun.pdf")
@@ -89,27 +88,6 @@ class RagService:
             self._medeni_kanun_repository = MedeniKanunDocumentRepository(file_path="./pdf/medeni_kanun.pdf")
             self._tuketicinin_korunmasi_kanun_repository = TuketicininKorunmasiKanunDocumentRepository(file_path="./pdf/tuketicinin_korunmasi_hakkinda_kanun.pdf")
             self._turk_ticaret_kanun_repository = TurkTicaretKanunDocumentRepository(file_path="./pdf/turk_ticaret_kanun.pdf")
-
-
-            # Initialize the document repositories.
-            self._hukuk_muhakemeleri_kanun_repository.init_documents()
-            self._icra_ve_iflas_kanun_repository.init_documents()
-            self._idari_yargilama_usulu_kanun_repository.init_documents()
-            self._turk_anayasasi_repository.init_documents()
-            self._is_isci_kanun_repository.init_documents()
-            self._borclar_kanun_repository.init_documents()
-            self._sinai_mulkiyet_kanun_repository.init_documents()
-            self._turk_ceza_kanun_repository.init_documents()
-            self._rekabetin_korunmasi_kanun_repository.init_documents()
-            self._ceza_muhakeme_kanun_repository.init_documents()
-            self._elektronik_ticaretin_duzenlenmesi_kanun_repository.init_documents()
-            self._gelir_vergisi_kanun_repository.init_documents()
-            self._infaz_kanun_repository.init_documents()
-            self._kabahatler_kanun_repository.init_documents()
-            self._kvkk_kanun_repository.init_documents()
-            self._medeni_kanun_repository.init_documents()
-            self._tuketicinin_korunmasi_kanun_repository.init_documents()
-            self._turk_ticaret_kanun_repository.init_documents()
 
 
 

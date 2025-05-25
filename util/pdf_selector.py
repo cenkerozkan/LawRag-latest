@@ -1,9 +1,7 @@
 import os
 
-from langchain_chroma import Chroma
 from langchain_core.example_selectors import SemanticSimilarityExampleSelector
 from langchain_core.vectorstores import InMemoryVectorStore
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_cohere import CohereEmbeddings
 
 

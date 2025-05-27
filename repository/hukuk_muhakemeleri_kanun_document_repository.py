@@ -35,9 +35,17 @@ class HukukMuhakemeleriKanunDocumentRepository(DocumentRepositoryBase):
 
     async def aretrieve(
             self,
-            query: str
+            query: str,
+            conversation_history: list[dict[str, str]]
     ) -> str:
-        self._logger.info(f"Retrieving documents for query: {query}")
-        docs = await self._db.asimilarity_search(query=query, filter={"source": {"$eq": self.__class__.__name__}})
+        self._logger.info(f"Generaqting HyDE for query: {query}")
+        hyde_generator_result: str = await self._generate_hyde(
+            query=query,
+            conversation_history=conversation_history,
+            law_name=self.__class__.__name__,
+        )
+        self._logger.info(f"Retrieving documents for query: {hyde_generator_result}")
+        docs = await self._db.asimilarity_search(query=hyde_generator_result,
+                                                 filter={"source": {"$eq": self.__class__.__name__}})
         top_docs_content = "\n".join([doc.page_content for doc in docs[:DOC_REPO_RESULT_K]])
         return str(f"{self.__class__.__name__} RAG Context\n" + top_docs_content)

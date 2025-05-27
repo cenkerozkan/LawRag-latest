@@ -1,9 +1,7 @@
 import datetime
 import os
 import traceback
-import sys
 
-from starlette.concurrency import run_in_threadpool
 from google import genai
 
 # DOC REPOS.
@@ -31,31 +29,12 @@ from db.model.chat_thread_model import ChatThreadModel
 from db.model.message_model import MessageModel
 from repository.context_repository import ContextRepository
 from util.pdf_selector import PdfSelector
-from agents.pdf_selector_agent import pdf_selector_agent
 from util.logger import get_logger
 from util.prompt_generator import prompt_generator
 from agents.web_search_agent import web_search_agent
-from agents.hyde_generator_agent import hyde_generator_agent
 from config.config import MESSAGE_HISTORY_SIZE
+from config.config import LOOKUP_TABLE
 
-# This is for making document retrieval much more easy.
-# Change the lookup table to use the repository instances
-_LOOKUP_TABLE: dict = {
-    "is_isci_kanun": lambda self, query: self._is_isci_kanun_repository.aretrieve(query),
-    "borclar_kanun": lambda self, query: self._borclar_kanun_repository.aretrieve(query),
-    "sinai_mulkiyet_kanun": lambda self, query: self._sinai_mulkiyet_kanun_repository.aretrieve(query),
-    "turk_ceza_kanun": lambda self, query: self._turk_ceza_kanun_repository.aretrieve(query),
-    "ceza_muhakeme_kanun": lambda self, query: self._ceza_muhakeme_kanun_repository.aretrieve(query),
-    "elektronik_ticaretin_duzenlenmesi_hakkinda_kanun": lambda self, query: self._elektronik_ticaretin_duzenlenmesi_kanun_repository.aretrieve(query),
-    "gelir_vergisi_kanunu": lambda self, query: self._gelir_vergisi_kanun_repository.aretrieve(query),
-    "infaz_kanun": lambda self, query: self._infaz_kanun_repository.aretrieve(query),
-    "kvkk_kanun": lambda self, query: self._kvkk_kanun_repository.aretrieve(query),
-    "medeni_kanun": lambda self, query: self._medeni_kanun_repository.aretrieve(query),
-    "rekabet_kanun": lambda self, query: self._rekabetin_korunmasi_kanun_repository.aretrieve(query),
-    "tuketici_kanun": lambda self, query: self._tuketicinin_korunmasi_kanun_repository.aretrieve(query),
-    "turk_ticaret_kanun": lambda self, query: self._turk_ticaret_kanun_repository.aretrieve(query),
-    "vergi_usul_kanun": lambda self, query: self._vergi_usul_kanun_repository.aretrieve(query),
-}
 
 class RagService:
     def __init__(self):
@@ -120,39 +99,22 @@ class RagService:
             pdfs: list = await self._select_pdfs(query)
             self._logger.info(f"Selected pdfs: {pdfs}")
 
-            # First try with HyDE generated content
-            hyde_result = await hyde_generator_agent.generate_hyde_content(
-                query=query,
-                conversation_history=conversation_history,
-                selected_pdfs=pdfs
-            )
-
-            # Check if HyDE agent returned the string "false"
-            hyde_data = hyde_result["data"]
-            if hyde_data == "false":
-                search_query = query
-                self._logger.info("HyDE agent returned 'false' as data, using original query")
-            else:
-                search_query = hyde_data if hyde_result["success"] else query
-                self._logger.info(f"Using {'HyDE' if hyde_result['success'] else 'original'} query: {search_query}")
-
-
             for pdf in pdfs:
-                if pdf in _LOOKUP_TABLE:
-                    retrieval_result = await _LOOKUP_TABLE[pdf](self, search_query)
+                if pdf in LOOKUP_TABLE:
+                    retrieval_result = await LOOKUP_TABLE[pdf](self, query, conversation_history)
                     self._logger.info(f"{pdf} result: {retrieval_result}")
                     result += retrieval_result
 
             # Retrieve defaults.
-            hukuk_muhakeme_result: str = await self._hukuk_muhakemeleri_kanun_repository.aretrieve(search_query)
-            icra_ve_iflas_result: str = await self._icra_ve_iflas_kanun_repository.aretrieve(search_query)
-            idari_yargilama_result: str = await self._idari_yargilama_usulu_kanun_repository.aretrieve(search_query)
-            turk_anayasasi_result: str = await self._turk_anayasasi_repository.aretrieve(search_query)
+            hukuk_muhakeme_result: str = await self._hukuk_muhakemeleri_kanun_repository.aretrieve(query, conversation_history)
+            icra_ve_iflas_result: str = await self._icra_ve_iflas_kanun_repository.aretrieve(query, conversation_history)
+            idari_yargilama_result: str = await self._idari_yargilama_usulu_kanun_repository.aretrieve(query, conversation_history)
+            turk_anayasasi_result: str = await self._turk_anayasasi_repository.aretrieve(query, conversation_history)
             result += hukuk_muhakeme_result + icra_ve_iflas_result + idari_yargilama_result + turk_anayasasi_result
 
         except Exception as e:
             self._logger.error(f"Error retrieving rag: {e}")
-            traceback.print_exc(file=sys.stdout)
+            traceback.print_exc()
 
         return result
 

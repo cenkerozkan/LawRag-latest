@@ -1,4 +1,4 @@
-from typing import List
+from config.config import LOOKUP_TABLE
 
 class PromptGenerator:
     @staticmethod
@@ -36,7 +36,7 @@ class PromptGenerator:
         return prompt
 
     @staticmethod
-    def generate_web_search_prompt(query: str, conversation_history: List[dict]) -> str:
+    def generate_web_search_prompt(query: str, conversation_history: list[dict]) -> str:
         prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
                     <prompt>
                         <instruction>
@@ -57,33 +57,46 @@ class PromptGenerator:
         return prompt
 
     @staticmethod
-    def generate_hyde_rag_search_prompt(query: str, conversation_history: List[dict], selected_pdfs: List[str]) -> str:
-        selected_pdfs_str = "\n".join([f"<pdf>{pdf_name}</pdf>" for pdf_name in selected_pdfs])
+    def generate_hyde_rag_search_prompt(query: str, conversation_history: list[dict], law_name: str) -> str:
         prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
                     <prompt>
                         <instruction>
-                        Bu görev, HyDE RAG (Hypothetical Document Embeddings for Retrieval-Augmented Generation) yaklaşımına göre çalışır.
-                        Amacın, kullanıcının sorduğu hukuki soruya karşılık olarak, embedding işleminde kullanılacak bağlamsal ve teknik bir açıklama üretmektir.
-
-                        - Üreteceğin açıklama, kullanıcının kastettiği hukuki sorunun özetini ve teknik içeriğini temsil etmelidir.
-                        - Bu açıklama sayesinde sistem, daha isabetli hukuki içeriklere erişecektir.
-                        - Kullanıcının ilgilendiği kanunlar listelenmiştir. Yalnızca bu belgeler çerçevesinde içerik üret.
-                        - Eğer kullanıcı sorgusu hukukla doğrudan ilgili değilse, yalnızca "false" cevabını dön.
-                        - Eğer sorgu belirtilen belgelerle alakasızsa, yine sadece "false" cevabını dön.
-                        - Açıklama 3-5 cümleyi geçmemeli, teknik ama sade bir hukuk dili kullanılmalı ve kullanıcıya hitap eden ifadelerden kaçınılmalıdır.
-                        - Varsayımsal metin üretirken, bilgilerin dahilindeki **gerçek kanun adlarını ve madde numaralarını** mümkün olduğunca kullan.
-                        - Sample’larda görüldüğü gibi, her cevaptaki madde atıfları (ör. “TBK Madde 49”, “TCK Madde 125/I”) kullanılmalı ve 3 maddelik net bir liste halinde sunulmalıdır.
-                        - Gerçekte var olan hukuk terimlerini ve yapıları kullanmaya özen göster.
-                        - Cevabın embedding'e uygun, bilgi yoğun ve özgün olmalıdır. Sample’ı göz önünde bulundurabilirsin.
-                    </instruction>
+                            Bu görev, HyDE RAG (Hypothetical Document Embeddings for Retrieval-Augmented Generation) yaklaşımına göre çalışır.
+                            Amacın, kullanıcının sorduğu hukuki soruya karşılık olarak, embedding işleminde kullanılacak, kanunları içeren maddeler yazmandır.
+                        
+                            - Üreteceğin kanunlar, kullanıcının sorusuna göre selected_law kısmında seçilen kanunla doğrudan alakalı olmalıdır.
+                            - Bu açıklama sayesinde sistem, daha isabetli hukuki içeriklere erişecektir.
+                            - Kullanıcının ilgilendiği kanun belirtilmiştir. Yalnızca bu kanun çerçevesinde içerik üret, ve mümkünse kullanıcının sorusunu ilgilendiren bütün kanunları belirt.
+                            - Eğer kullanıcı sorgusu hukukla doğrudan ilgili değilse, yalnızca "false" cevabını dön.
+                            - Eğer sorgu belirtilen belgelerle alakasızsa, yine sadece "false" cevabını dön.
+                            - Selected_law etiketi içinde belirtilen kanun adını kullanarak, o kanunla ilgili bir açıklama üret.
+                            - Kullanıcının sorusunu ilgilendiren ne kadar kanun maddesi var ise onların hepsini belirtmen gerekli
+                            - Varsayımsal metin üretirken, bilgilerin dahilindeki **gerçek kanun adlarını ve madde numaralarını** mümkün olduğunca kullan.
+                            - Her cevabın çıktısı, aşağıdaki `<samples>` etiketindeki `<hydes>` elemanlarıyla aynı formatta bir `<hyde>` etiketi içinde olmalıdır.
+                            - Gerçekte var olan hukuk terimlerini ve yapıları kullanmaya özen göster.
+                            - Cevabın embedding'e uygun, bilgi yoğun ve özgün olmalıdır. Sample’ı göz önünde bulundurabilirsin.
+                        </instruction>
+                        <selected_law>
+                            {law_name}
+                        </selected_law>
                         <samples>
-                            <!-- Few-shot örnekler burada yer alıyor -->
+                            <hydes>
+                                <hyde>
+                                    Türk Borçlar Kanunu Madde 350 –
+                                    Kiraya veren, konut veya çatılı işyeri kiralarında, kendisi, eşi, altsoyu, üstsoyu veya bakmakla yükümlü olduğu kişiler için gereksinim hâlinde sözleşme bitiminden itibaren bir ay içinde tahliye davası açabilir. Ayrıca, taşınmazı sonradan edinen kişi de bu gereksinim nedeniyle benzer şartlarda tahliye talep edebilir.
+                                </hyde>
+                                <hyde>
+                                    Türk Borçlar Kanunu Madde 351 –
+                                    Kiraya veren, gereksinim nedeniyle tahliye edilen taşınmazı, haklı bir neden olmadıkça üç yıl boyunca başkası için kullanamaz veya kiraya veremez. Bu madde, gereksiz tahliye taleplerinin önüne geçmek için bir güvence niteliğindedir.
+                                </hyde>
+                                <hyde>
+                                    Türk Borçlar Kanunu Madde 352 –
+                                    Kiraya verenin yazılı bildirimiyle kiracı, tahliyeyi taahhüt etmişse ve süresi içinde çıkmamışsa, bu taahhüt tahliye davasında delil olarak kullanılabilir. Ayrıca, aynı kira döneminde iki haklı ihtar alan kiracının da tahliyesi istenebilir.
+                                </hyde>
+                            </hydes>
                         </samples>
-                        <selectedpdfs>
-                            {selected_pdfs_str}
-                        </selectedpdfs>
                         <conversation>
-                            {conversation_history}
+                            {conversation_history[-20:]}
                         </conversation>
                         <userquery>
                             {query}
@@ -93,12 +106,7 @@ class PromptGenerator:
 
     @staticmethod
     def generate_pdf_selector_prompt(user_query: str) -> str:
-        law_keys = [
-            "is_isci_kanun", "borclar_kanun", "sinai_mulkiyet_kanun", "turk_ceza_kanun",
-            "ceza_muhakeme_kanun", "elektronik_ticaretin_duzenlenmesi_hakkinda_kanun", "gelir_vergisi_kanunu",
-            "infaz_kanun", "kvkk_kanun", "medeni_kanun", "rekabet_kanun", "tuketici_kanun",
-            "turk_ticaret_kanun", "vergi_usul_kanun"
-        ]
+        law_keys: list = list(LOOKUP_TABLE.keys())
         valid_laws = ", ".join([f'"{k}"' for k in law_keys])
         prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
         <prompt>

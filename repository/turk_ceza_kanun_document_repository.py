@@ -39,13 +39,18 @@ class TurkCezaKanunDocumentRepository(DocumentRepositoryBase):
             conversation_history: list[str]
     ) -> str:
         self._logger.info(f"Generaqting HyDE for query: {query}")
-        hyde_generator_result: str = await self._generate_hyde(
+        hyde_generator_result: list[str] = await self._generate_hyde(
             query=query,
             conversation_history=conversation_history,
             law_name=self.__class__.__name__,
         )
         self._logger.info(f"Retrieving documents for query: {hyde_generator_result}")
-        docs = await self._db.asimilarity_search(query=hyde_generator_result,
-                                                 filter={"source": {"$eq": self.__class__.__name__}})
-        top_docs_content = "\n".join([doc.page_content for doc in docs[:DOC_REPO_RESULT_K]])
+        top_docs_content: str = ""
+        for hyde_result in hyde_generator_result:
+            self._logger.debug(hyde_result)
+            docs = await self._db.asimilarity_search(query=hyde_result,
+                                                     filter={"source": {"$eq": self.__class__.__name__}})
+            top_docs: list = [doc.page_content for doc in docs[:DOC_REPO_RESULT_K]]
+            for doc in top_docs:
+                top_docs_content += doc
         return str(f"{self.__class__.__name__} RAG Context\n" + top_docs_content)

@@ -14,24 +14,21 @@ class DocumentRepositoryBase(ABC):
             query: str,
             conversation_history: list,
             law_name: str
-    ) -> str:
+    ) -> list[str]:
         self._logger.info(f"Generating HyDE for query: {query}")
-        hyde_result = await hyde_generator_agent.generate_hyde_content(
+        hyde_result: dict = await hyde_generator_agent.generate_hyde_content(
             query=query,
             conversation_history=conversation_history,
             law_name=law_name
         )
-        hyde_data: str = hyde_result.get("data", "")
-        if hyde_data == "false":
-            self._logger.warn(f"HyDE generation returned false for query: {query}")
-            return query
-        if len(hyde_data) == 0:
+        if not hyde_result.get("success"):
             self._logger.warn(f"No HyDE content generated for query: {query}")
-            return query
+            return [query]
+        if hyde_result.get("hyde_contents") == "false":
+            self._logger.warn(f"No HyDE content generated for query: {query}")
+            return [query]
         else:
-            self._logger.info(f"HyDE content generated successfully for query: {query}")
-            return hyde_data
-
+            return hyde_result.get("data").get("hyde_contents")
 
     # NOTE: Buraya istemediğim bir bağımlılık ekliyorum.
     @abstractmethod

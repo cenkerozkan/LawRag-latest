@@ -80,17 +80,37 @@ class PromptGenerator:
                             {law_name}
                         </selected_law>
                         <samples>
+                            <selected_law>
+                                Borçlar Kanunu
+                            </selected_law>
                             <hydes>
                                 <hyde>
-                                    Türk Borçlar Kanunu Madde 350 –
-                                    Kiraya veren, konut veya çatılı işyeri kiralarında, kendisi, eşi, altsoyu, üstsoyu veya bakmakla yükümlü olduğu kişiler için gereksinim hâlinde sözleşme bitiminden itibaren bir ay içinde tahliye davası açabilir. Ayrıca, taşınmazı sonradan edinen kişi de bu gereksinim nedeniyle benzer şartlarda tahliye talep edebilir.
+                                    MADDE 350- Kiraya veren, kira sözleşmesini;
+                                        1. Kiralananı kendisi, eşi, altsoyu, üstsoyu veya kanun gereği bakmakla yükümlü
+                                        olduğu diğer kişiler için konut ya da işyeri gereksinimi sebebiyle kullanma zorunluluğu varsa,
+                                        2. Kiralananın yeniden inşası veya imarı amacıyla esaslı onarımı, genişletilmesi ya da
+                                        değiştirilmesi gerekli ve bu işler sırasında kiralananın kullanımı imkânsız ise,
+                                        belirli süreli sözleşmelerde sürenin sonunda, belirsiz süreli sözleşmelerde kiraya
+                                        ilişkin genel hükümlere göre fesih dönemine ve fesih bildirimi için öngörülen sürelere
+                                        uyularak belirlenecek tarihten başlayarak bir ay içinde açacağı dava ile sona erdirebilir.
                                 </hyde>
                                 <hyde>
-                                    Türk Borçlar Kanunu Madde 351 –
-                                    Kiraya veren, gereksinim nedeniyle tahliye edilen taşınmazı, haklı bir neden olmadıkça üç yıl boyunca başkası için kullanamaz veya kiraya veremez. Bu madde, gereksiz tahliye taleplerinin önüne geçmek için bir güvence niteliğindedir.
+                                    MADDE 352- Kiracı, kiralananın teslim edilmesinden sonra, kiraya verene karşı,
+                                        kiralananı belli bir tarihte boşaltmayı yazılı olarak üstlendiği hâlde boşaltmamışsa kiraya
+                                        veren, kira sözleşmesini bu tarihten başlayarak bir ay içinde icraya başvurmak veya dava
+                                        açmak suretiyle sona erdirebilir.
+                                        Kiracı, bir yıldan kısa süreli kira sözleşmelerinde kira süresi içinde; bir yıl ve daha
+                                        uzun süreli kira sözleşmelerinde ise bir kira yılı veya bir kira yılını aşan süre içinde kira
+                                        bedelini ödemediği için kendisine yazılı olarak iki haklı ihtarda bulunulmasına sebep olmuşsa
+                                        kiraya veren, kira süresinin ve bir yıldan uzun süreli kiralarda ihtarların yapıldığı kira yılının
+                                        bitiminden başlayarak bir ay içinde, dava yoluyla kira sözleşmesini sona erdirebilir.
+                                        Kiracının veya birlikte yaşadığı eşinin aynı ilçe veya belde belediye sınırları içinde
+                                        oturmaya elverişli bir konutu bulunması durumunda kiraya veren, kira sözleşmesinin
+                                        kurulması sırasında bunu bilmiyorsa, sözleşmenin bitiminden başlayarak bir ay içinde
+                                        sözleşmeyi dava yoluyla sona erdirebilir.
                                 </hyde>
                                 <hyde>
-                                    Türk Borçlar Kanunu Madde 352 –
+                                    MADDE 352 –
                                     Kiraya verenin yazılı bildirimiyle kiracı, tahliyeyi taahhüt etmişse ve süresi içinde çıkmamışsa, bu taahhüt tahliye davasında delil olarak kullanılabilir. Ayrıca, aynı kira döneminde iki haklı ihtar alan kiracının da tahliyesi istenebilir.
                                 </hyde>
                             </hydes>

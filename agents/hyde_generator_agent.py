@@ -47,7 +47,7 @@ class HyDEGeneratorAgent:
             "success": False,
             "message": "",
             "error": "",
-            "data": ""
+            "data": {}
         }
         try:
             prompt: str = prompt_generator.generate_hyde_rag_search_prompt(
@@ -76,7 +76,7 @@ class HyDEGeneratorAgent:
                     result.update({
                         "success": True,
                         "message": "HyDE content generated successfully",
-                        "data": hyde_contents_str
+                        "data": {"hyde_contents": hyde_contents}
                     })
                     self._logger.info(f"Parsed {len(hyde_contents)} HyDE contents")
                 else:

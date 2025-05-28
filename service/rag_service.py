@@ -157,7 +157,7 @@ class RagService:
             "success": False,
             "message": "",
             "error": "",
-            "data": ""
+            "data": {}
         }
         web_search_results: list[dict[str, str]]
         web_sources: list[str] | None = None

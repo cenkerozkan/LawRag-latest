@@ -105,13 +105,6 @@ class RagService:
                     self._logger.info(f"{pdf} result: {retrieval_result}")
                     result += retrieval_result
 
-            # Retrieve defaults.
-            hukuk_muhakeme_result: str = await self._hukuk_muhakemeleri_kanun_repository.aretrieve(query, conversation_history)
-            icra_ve_iflas_result: str = await self._icra_ve_iflas_kanun_repository.aretrieve(query, conversation_history)
-            idari_yargilama_result: str = await self._idari_yargilama_usulu_kanun_repository.aretrieve(query, conversation_history)
-            turk_anayasasi_result: str = await self._turk_anayasasi_repository.aretrieve(query, conversation_history)
-            result += hukuk_muhakeme_result + icra_ve_iflas_result + idari_yargilama_result + turk_anayasasi_result
-
         except Exception as e:
             self._logger.error(f"Error retrieving rag: {e}")
             traceback.print_exc()

@@ -23,4 +23,8 @@ LOOKUP_TABLE: dict = {
     "tuketici_kanun": lambda self, query, conversation_history: self._tuketicinin_korunmasi_kanun_repository.aretrieve(query, conversation_history),
     "turk_ticaret_kanun": lambda self, query, conversation_history: self._turk_ticaret_kanun_repository.aretrieve(query, conversation_history),
     "vergi_usul_kanun": lambda self, query, conversation_history: self._vergi_usul_kanun_repository.aretrieve(query, conversation_history),
+    "hukuk_muhakemeleri_kanun": lambda self, query, conversation_history: self._hukuk_muhakemeleri_kanun_repository.aretrieve(query, conversation_history),
+    "icra_ve_iflas_kanun": lambda self, query, conversation_history: self._icra_ve_iflas_kanun_repository.aretrieve(query, conversation_history),
+    "idari_yargilama_usulu_kanun": lambda self, query, conversation_history: self._idari_yargilama_usulu_kanun_repository.aretrieve(query, conversation_history),
+    "turk_anayasasi": lambda self, query, conversation_history: self._turk_anayasasi_repository.aretrieve(query, conversation_history),
 }

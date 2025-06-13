@@ -57,7 +57,7 @@ class HyDEGeneratorAgent:
             )
             self._logger.info(f"Generating HyDE content for query: {query}")
 
-            response = self._gemini_client.models.generate_content(
+            response = await self._gemini_client.aio.models.generate_content(
                 model="gemini-2.0-flash",
                 contents=prompt
             )

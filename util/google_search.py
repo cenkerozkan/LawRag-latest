@@ -4,7 +4,9 @@ import time
 import os
 
 import aiohttp
+from starlette.concurrency import run_in_threadpool
 import pdfplumber
+from PyPDF2 import PdfReader
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
 
@@ -34,7 +36,7 @@ async def fetch_data(session, url):
 
 
 def fetch_urls(search_data: dict) -> list:
-    urls = []
+    urls: list = []
     if 'items' in search_data:
         for item in search_data['items']:
             if 'link' in item:
@@ -55,12 +57,15 @@ async def fetch_single_page(session, url):
                 content_type = response.headers.get('Content-Type', '').lower()
 
                 if 'application/pdf' in content_type:
-                    # Handle PDF content
                     pdf_bytes = await response.read()
                     try:
-                        with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
-                            text = ' '.join(page.extract_text() or '' for page in pdf.pages)
-                            return {"page_url": url, "content": text, "role": "Google Search"}
+                        pdf_stream = io.BytesIO(pdf_bytes)
+                        reader = await run_in_threadpool(PdfReader, pdf_stream)
+                        if len(reader.pages) > 100:
+                            logger.info(f"Skipping PDF with >100 pages: {url}")
+                            return None
+                        text = ' '.join(page.extract_text() or '' for page in reader.pages)
+                        return {"page_url": url, "content": text, "role": "Google Search"}
                     except Exception as pdf_error:
                         logger.error(f"Error extracting PDF content from {url}: {str(pdf_error)}")
                         return None
@@ -80,7 +85,7 @@ async def fetch_single_page(session, url):
                         logger.warning(f"Could not decode content from {url}")
                         return None
 
-                cleaned_text = clean_html(raw_html)
+                cleaned_text = await run_in_threadpool(clean_html, raw_html) # I made it this way because it was blocking the event loop
                 return {"page_url": url, "content": cleaned_text, "role": "Google Search"}
             else:
                 logger.error(f"Error fetching URL {url}: {response.status}")
@@ -102,46 +107,47 @@ async def fetch_page_content(list_of_urls: list) -> list:
 
 async def google_search(search_query: str):
     """
-    Sample response for google_search:
-    [
-        {
-            "page_url": "https://example.com/page1",
-            "content": "This is the cleaned text content from page 1...",
-            "role": "Google Search"
-        },
-        {
-            "page_url": "https://example.com/page2.pdf",
-            "content": "This is the extracted text from the PDF on page 2...",
-            "role": "Google Search"
-        },
-        {
-            "page_url": "https://anotherexample.org/article",
-            "content": "Article text cleaned and extracted...",
-            "role": "Google Search"
-        },
-        None, # Could be None if a particular URL fetch failed
-        {
-            "page_url": "https://example.com/page3",
-            "content": "More content from another page...",
-            "role": "Google Search"
-        }
-    ]
-    Or None if the initial Google Custom Search API call fails.
-    """
-    base_url = f"https://www.googleapis.com/customsearch/v1?key={os.getenv('GOOGLE_CUSTOM_SEARCH_API')}&cx={os.getenv('GOOGLE_CUSTOM_SEARCH_ENGINE_ID')}"
-    query_result: dict
-    final_result: list[dict]
+       Sample response for google_search:
+       [
+           {
+               "page_url": "https://example.com/page1",
+               "content": "This is the cleaned text content from page 1...",
+               "role": "Google Search"
+           },
+           {
+               "page_url": "https://example.com/page2.pdf",
+               "content": "This is the extracted text from the PDF on page 2...",
+               "role": "Google Search"
+           },
+           {
+               "page_url": "https://anotherexample.org/article",
+               "content": "Article text cleaned and extracted...",
+               "role": "Google Search"
+           },
+           None, # Could be None if a particular URL fetch failed
+           {
+               "page_url": "https://example.com/page3",
+               "content": "More content from another page...",
+               "role": "Google Search"
+           }
+       ]
+      Or None if the initial Google Custom Search API call fails.
+   """
+    key = os.getenv('GOOGLE_CUSTOM_SEARCH_API')
+    cx = os.getenv('GOOGLE_CUSTOM_SEARCH_ENGINE_ID')
+    base_url = f"https://www.googleapis.com/customsearch/v1?key={key}&cx={cx}&num=5"
 
     logger.info(f"Search query: {search_query}")
 
     async with aiohttp.ClientSession() as session:
         query_result = await fetch_data(session, base_url + f"&q={search_query}")
-        logger.info("Got result!")
 
-    if query_result is None:
+    if not query_result:
         return None
 
-    urls = fetch_urls(query_result)
+    urls = fetch_urls(query_result or {})
+    urls = list(dict.fromkeys(urls))[:10]
+
     logger.info(f"Got urls: {urls}")
     final_result = await fetch_page_content(urls)
     logger.info("Got final result!")

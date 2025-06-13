@@ -163,7 +163,7 @@ class RagService:
         document_content: str = await self._retrieve_document_content(query, contents)
 
         # Generate system instructions
-        prompt: str = self._prompt_generator.generate_main_prompt(rag_content=document_content, user_query=query)
+        prompt: str = self._prompt_generator.generate_rag_agent_prompt(rag_content=document_content, user_query=query)
 
 
         # If web search is asked.
@@ -175,14 +175,15 @@ class RagService:
         # Generate content with Gemini.
         try:
             contents.append(prompt)
-            response = self._gemini_client.models.generate_content(
+            response = await self._gemini_client.aio.models.generate_content(
                 model="gemini-2.0-flash",
                 contents=contents
             )
         except Exception as e:
             result.update({"success": False,
                            "message": "Sistemde yaşanan bir aksaklık sebebiyle şu an size yardımcı olamıyorum.",
-                           "error": str(e)})
+                           "error": str(e),
+                           "data": {"response": "Sistemde yaşanan bir aksaklık sebebiyle şu an size yardımcı olamıyorum."}})
             self._logger.error(f"Error generating response: {e}")
             return result
 

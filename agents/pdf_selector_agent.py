@@ -29,7 +29,7 @@ class PdfSelectorAgent:
         prompt = prompt_generator.generate_pdf_selector_prompt(query)
         response = None
         try:
-            response = self._gemini_client.models.generate_content(
+            response = await self._gemini_client.aio.models.generate_content(
                 model="gemma-3-27b-it",
                 contents=prompt,
             )

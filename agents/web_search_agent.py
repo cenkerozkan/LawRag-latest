@@ -27,7 +27,7 @@ class WebSearchAgent:
         results: list[dict[str, str]]
 
         try:
-            response = self._gemini_client.models.generate_content(
+            response = await self._gemini_client.aio.models.generate_content(
                 model="gemini-2.0-flash",
                 contents=prompt,
             )

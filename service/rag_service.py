@@ -24,6 +24,8 @@ from repository.kvkk_kanun_document_repository import KvkkKanunDocumentRepositor
 from repository.medeni_kanun_document_repository import MedeniKanunDocumentRepository
 from repository.tuketicinin_korunmasi_kanun_document_repository import TuketicininKorunmasiKanunDocumentRepository
 from repository.turk_ticaret_kanun_document_repository import TurkTicaretKanunDocumentRepository
+from repository.gumruk_kanun_document_repository import GumrukKanunDocumentRepository
+from repository.polis_vazife_salahiyet_kanun_document_repository import PolisVazifeSalahiyetKanunDocumentRepository
 
 from db.model.chat_thread_model import ChatThreadModel
 from db.model.message_model import MessageModel
@@ -67,6 +69,8 @@ class RagService:
             #self._medeni_kanun_repository = MedeniKanunDocumentRepository(file_path="./pdf/medeni_kanun.pdf")
             #self._tuketicinin_korunmasi_kanun_repository = TuketicininKorunmasiKanunDocumentRepository(file_path="./pdf/tuketicinin_korunmasi_hakkinda_kanun.pdf")
             #self._turk_ticaret_kanun_repository = TurkTicaretKanunDocumentRepository(file_path="./pdf/turk_ticaret_kanun.pdf")
+            self._polis_vazife_salahiyet_kanun_repository = PolisVazifeSalahiyetKanunDocumentRepository(file_path="./pdf/polis_vazife_salahiyet_kanun.pdf")
+            self._gumruk_kanun_repository = GumrukKanunDocumentRepository(file_path="./pdf/gumruk_kanun.pdf")
 
 
 
@@ -177,7 +181,7 @@ class RagService:
         try:
             contents.append(prompt)
             response = await self._gemini_client.aio.models.generate_content(
-                model="gemini-2.0-flash",
+                model="gemini-2.5-flash-preview-05-20",
                 contents=contents
             )
         except Exception as e:

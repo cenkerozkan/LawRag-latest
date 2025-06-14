@@ -2,28 +2,23 @@ import os
 from util.logger import get_logger
 from util.embedding_model_getter import get_embedding_model
 from base.document_repository_base import DocumentRepositoryBase
-from config.config import CHUNK_SIZE
-from config.config import DOC_REPO_RESULT_K
+from config.config import CHUNK_SIZE, DOC_REPO_RESULT_K
 from langchain_community.vectorstores import FAISS
 from langchain_cohere.embeddings import CohereEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-
-class HukukMuhakemeleriKanunDocumentRepository(DocumentRepositoryBase):
-    def __init__(
-            self,
-            file_path: str
-    ):
+class PolisVazifeSalahiyetKanunDocumentRepository(DocumentRepositoryBase):
+    def __init__(self, file_path: str):
         super().__init__()
-        self._ids: list = []
         self._logger = get_logger(__name__)
-        self._logger.info(f"Initializing hukuk_muhakemeleri_kanun Document Repository")
+        self._logger.info(f"Initializing polis_vazife_salahiyet_kanun Document Repository")
 
         self._logger.info(f"Loading documents from file: {file_path}")
         self._loader = PyPDFLoader(file_path)
-        self._documents = (RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=100)
-                           .split_documents(self._loader.load()))
+        self._documents = RecursiveCharacterTextSplitter(
+            chunk_size=CHUNK_SIZE, chunk_overlap=100
+        ).split_documents(self._loader.load())
         for doc in self._documents:
             doc.metadata["source"] = self.__class__.__name__
 
@@ -33,9 +28,9 @@ class HukukMuhakemeleriKanunDocumentRepository(DocumentRepositoryBase):
         )
 
     async def aretrieve(
-            self,
-            query: str,
-            conversation_history: list[str]
+    self,
+    query: str,
+    conversation_history: list[str]
     ) -> str:
         self._logger.info(f"Generaqting HyDE for query: {query}")
         hyde_generator_result: list[str] = await self._generate_hyde(

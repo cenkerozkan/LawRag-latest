@@ -27,10 +27,10 @@ class {{ClassName}}(DocumentRepositoryBase):
             CohereEmbeddings(model=get_embedding_model("cohere-light"))
         )
 
-            async def aretrieve(
-            self,
-            query: str,
-            conversation_history: list[str]
+    async def aretrieve(
+    self,
+    query: str,
+    conversation_history: list[str]
     ) -> str:
         self._logger.info(f"Generaqting HyDE for query: {query}")
         hyde_generator_result: list[str] = await self._generate_hyde(

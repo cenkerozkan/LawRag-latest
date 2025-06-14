@@ -237,7 +237,7 @@ class PromptGenerator:
         return prompt
 
     @staticmethod
-    def router_agent_prompt(user_query: str) -> str:
+    def generate_router_agent_prompt(user_query: str) -> str:
         prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
                         <prompt>
                           <instruction>

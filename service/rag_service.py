@@ -48,25 +48,25 @@ class RagService:
             self._context_repository = ContextRepository()
 
             # Document repositories injection.
-            self._hukuk_muhakemeleri_kanun_repository = HukukMuhakemeleriKanunDocumentRepository(file_path="./pdf/hukuk_muhakemeleri_kanun.pdf") # DEFAULT
-            self._icra_ve_iflas_kanun_repository = IcraVeIflasKanunDocumentRepository(file_path="./pdf/icra_ve_iflas_kanun.pdf") # DEFAULT
-            self._idari_yargilama_usulu_kanun_repository = IdariYargilamaUsuluKanunDocumentRepository(file_path="./pdf/idari_yargilama_usulu_kanun.pdf") # DEFAULT
-            self._turk_anayasasi_repository = TurkAnayasasiDocumentRepository(file_path="./pdf/turk_anayasasi.pdf") # DEFAULT
-            self._is_isci_kanun_repository = IsIsciKanunDocumentRepository(file_path="./pdf/is_isci_kanun.pdf")
-            self._borclar_kanun_repository = BorclarKanunDocumentRepository(file_path="./pdf/borclar_kanun.pdf")
-            self._sinai_mulkiyet_kanun_repository = SinaiMulkiyetKanunDocumentRepository(file_path="./pdf/sinai_mulkiyet_kanun.pdf")
-            self._turk_ceza_kanun_repository = TurkCezaKanunDocumentRepository(file_path="./pdf/turk_ceza_kanun.pdf")
-            self._rekabetin_korunmasi_kanun_repository = RekabetinKorunmasiKanunDocumentRepository(file_path="./pdf/rekabetin_korunmasi_hakkinda_kanun.pdf")
-            self._vergi_usul_kanun_repository = VergiUsulKanunDocumentRepository(file_path="./pdf/vergi_usul_kanun.pdf")
-            self._ceza_muhakeme_kanun_repository = CezaMuhakemeKanunDocumentRepository(file_path="./pdf/ceza_muhakeme_kanun.pdf")
-            self._elektronik_ticaretin_duzenlenmesi_kanun_repository = ElektronikTicaretinDuzenlenmesiKanunDocumentRepository(file_path="./pdf/elektronik_ticaretin_duzenlenmesi_hakkinda_kanun.pdf")
-            self._gelir_vergisi_kanun_repository = GelirVergisiKanunDocumentRepository(file_path="./pdf/gelir_vergisi_kanunu.pdf")
-            self._infaz_kanun_repository = InfazKanunDocumentRepository(file_path="./pdf/infaz_kanun.pdf")
-            self._kabahatler_kanun_repository = KabahatlerKanunDocumentRepository(file_path="./pdf/kabahatler_kanun.pdf")
-            self._kvkk_kanun_repository = KvkkKanunDocumentRepository(file_path="./pdf/kvkk_kanun.pdf")
-            self._medeni_kanun_repository = MedeniKanunDocumentRepository(file_path="./pdf/medeni_kanun.pdf")
-            self._tuketicinin_korunmasi_kanun_repository = TuketicininKorunmasiKanunDocumentRepository(file_path="./pdf/tuketicinin_korunmasi_hakkinda_kanun.pdf")
-            self._turk_ticaret_kanun_repository = TurkTicaretKanunDocumentRepository(file_path="./pdf/turk_ticaret_kanun.pdf")
+            #self._hukuk_muhakemeleri_kanun_repository = HukukMuhakemeleriKanunDocumentRepository(file_path="./pdf/hukuk_muhakemeleri_kanun.pdf") # DEFAULT
+            #self._icra_ve_iflas_kanun_repository = IcraVeIflasKanunDocumentRepository(file_path="./pdf/icra_ve_iflas_kanun.pdf") # DEFAULT
+            #self._idari_yargilama_usulu_kanun_repository = IdariYargilamaUsuluKanunDocumentRepository(file_path="./pdf/idari_yargilama_usulu_kanun.pdf") # DEFAULT
+            #self._turk_anayasasi_repository = TurkAnayasasiDocumentRepository(file_path="./pdf/turk_anayasasi.pdf") # DEFAULT
+            #self._is_isci_kanun_repository = IsIsciKanunDocumentRepository(file_path="./pdf/is_isci_kanun.pdf")
+            #self._borclar_kanun_repository = BorclarKanunDocumentRepository(file_path="./pdf/borclar_kanun.pdf")
+            #self._sinai_mulkiyet_kanun_repository = SinaiMulkiyetKanunDocumentRepository(file_path="./pdf/sinai_mulkiyet_kanun.pdf")
+            #self._turk_ceza_kanun_repository = TurkCezaKanunDocumentRepository(file_path="./pdf/turk_ceza_kanun.pdf")
+            #self._rekabetin_korunmasi_kanun_repository = RekabetinKorunmasiKanunDocumentRepository(file_path="./pdf/rekabetin_korunmasi_hakkinda_kanun.pdf")
+            #self._vergi_usul_kanun_repository = VergiUsulKanunDocumentRepository(file_path="./pdf/vergi_usul_kanun.pdf")
+            #self._ceza_muhakeme_kanun_repository = CezaMuhakemeKanunDocumentRepository(file_path="./pdf/ceza_muhakeme_kanun.pdf")
+            #self._elektronik_ticaretin_duzenlenmesi_kanun_repository = ElektronikTicaretinDuzenlenmesiKanunDocumentRepository(file_path="./pdf/elektronik_ticaretin_duzenlenmesi_hakkinda_kanun.pdf")
+            #self._gelir_vergisi_kanun_repository = GelirVergisiKanunDocumentRepository(file_path="./pdf/gelir_vergisi_kanunu.pdf")
+            #self._infaz_kanun_repository = InfazKanunDocumentRepository(file_path="./pdf/infaz_kanun.pdf")
+            #self._kabahatler_kanun_repository = KabahatlerKanunDocumentRepository(file_path="./pdf/kabahatler_kanun.pdf")
+            #self._kvkk_kanun_repository = KvkkKanunDocumentRepository(file_path="./pdf/kvkk_kanun.pdf")
+            #self._medeni_kanun_repository = MedeniKanunDocumentRepository(file_path="./pdf/medeni_kanun.pdf")
+            #self._tuketicinin_korunmasi_kanun_repository = TuketicininKorunmasiKanunDocumentRepository(file_path="./pdf/tuketicinin_korunmasi_hakkinda_kanun.pdf")
+            #self._turk_ticaret_kanun_repository = TurkTicaretKanunDocumentRepository(file_path="./pdf/turk_ticaret_kanun.pdf")
 
 
 
@@ -147,6 +147,7 @@ class RagService:
             web_search: bool
     ) -> dict:
         result: dict = {
+            "code": 0,
             "success": False,
             "message": "",
             "error": "",
@@ -180,7 +181,8 @@ class RagService:
                 contents=contents
             )
         except Exception as e:
-            result.update({"success": False,
+            result.update({"code": 503,
+                           "success": False,
                            "message": "Sistemde yaşanan bir aksaklık sebebiyle şu an size yardımcı olamıyorum.",
                            "error": str(e),
                            "data": {"response": "Sistemde yaşanan bir aksaklık sebebiyle şu an size yardımcı olamıyorum."}})
@@ -203,13 +205,16 @@ class RagService:
                 is_updated = await self._update_chat_thread(chat_thread)
                 if is_updated:
                     result.update({
+                        "code": 503,
                         "success": True,
                         "message": "RAG Sorgusu başarıyla tamamlandı.",
                         "data": {"response": response.text}})
                     break
                 if i == 2:
                     self._logger.error(f"Failed to update chat thread after 3 attempts: {chat_thread.chat_id}")
-                    result.update({"success": False, "message": "Sohbet sırasında bir şeyler ters gitti!.",
+                    result.update({"code": 503,
+                                   "success": False,
+                                   "message": "Sohbet sırasında bir şeyler ters gitti!.",
                                    "data": {"response": "Şu anda size yardımcı olamıyorum."}})
                     return result
         result.update({"code":200, "success": True, "message": "RAG query processed successfully", "data": {"response": response.text}})

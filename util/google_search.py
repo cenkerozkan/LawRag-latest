@@ -50,27 +50,10 @@ def clean_html(content: str) -> str:
 
 
 async def fetch_single_page(session, url):
-    """Fetch content from a single URL and clean it"""
+    """Fetch content from a single HTML URL and clean it"""
     try:
         async with session.get(url) as response:
             if response.status == 200:
-                content_type = response.headers.get('Content-Type', '').lower()
-
-                if 'application/pdf' in content_type:
-                    pdf_bytes = await response.read()
-                    try:
-                        pdf_stream = io.BytesIO(pdf_bytes)
-                        reader = await run_in_threadpool(PdfReader, pdf_stream)
-                        if len(reader.pages) > 100:
-                            logger.info(f"Skipping PDF with >100 pages: {url}")
-                            return None
-                        text = ' '.join(page.extract_text() or '' for page in reader.pages)
-                        return {"page_url": url, "content": text, "role": "Google Search"}
-                    except Exception as pdf_error:
-                        logger.error(f"Error extracting PDF content from {url}: {str(pdf_error)}")
-                        return None
-
-                # Handle regular HTML content
                 try:
                     raw_html = await response.text()
                 except UnicodeDecodeError:
@@ -85,7 +68,7 @@ async def fetch_single_page(session, url):
                         logger.warning(f"Could not decode content from {url}")
                         return None
 
-                cleaned_text = await run_in_threadpool(clean_html, raw_html) # I made it this way because it was blocking the event loop
+                cleaned_text = await run_in_threadpool(clean_html, raw_html)
                 return {"page_url": url, "content": cleaned_text, "role": "Google Search"}
             else:
                 logger.error(f"Error fetching URL {url}: {response.status}")

@@ -7,7 +7,9 @@ from request_model.rag_request_model import RagRequestModel
 from response_model.response_model import ResponseModel
 from util.logger import get_logger
 from service.rag_service import rag_service
+from service.chat_service import chat_service
 from service.chat_thread_service import chat_thread_service
+from agents.router_agent import router_agent
 
 logger = get_logger(__name__)
 rag_router = APIRouter(prefix="/api/rag", tags=["RAG Service"])
@@ -31,8 +33,18 @@ async def query_rag(
             content=ResponseModel(success=False, message="Bilinmeyen bir hata oluştu!",
                                   data={}, error="").model_dump())
 
-    result = await rag_service.run(query=rag_request.query, chat_thread=service_result.get("data"),
-                                   web_search=rag_request.web_search)
+    # Call router agent first.
+    decision: str = await router_agent.run(service_result.get("data"), rag_request.query)
+    result: dict = {}
+    match decision:
+        case "rag":
+            result = await rag_service.run(query=rag_request.query, chat_thread=service_result.get("data"),
+                                           web_search=rag_request.web_search)
+        case "chat_agent":
+            result = await chat_service.run(query=rag_request.query, chat_thread=service_result.get("data"),
+                                            web_search=rag_request.web_search)
+
+
     logger.info(f"RAG query result: {result}")
     return JSONResponse(
         status_code=result.get("code"),

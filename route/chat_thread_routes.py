@@ -113,3 +113,19 @@ async def update_chat_name(
             error=result.get("error")
         ).model_dump()
     )
+
+@chat_thread_router.get("/generate_chat_name/{user_query}", tags=["Chat Thread Service"])
+async def generate_chat_name(
+        user_query: str,
+        credentials: HTTPAuthorizationCredentials = Depends(security)
+) -> JSONResponse:
+    result: dict = await chat_thread_service.generate_chat_name(user_query)
+    return JSONResponse(
+        status_code=result.get("code"),
+        content=ResponseModel(
+            success=result.get("success"),
+            message=result.get("message"),
+            data=result.get("data"),
+            error=result.get("error")
+        ).model_dump()
+    )

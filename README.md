@@ -101,10 +101,12 @@ For example, to access the create chat thread endpoint:
     *   [Get Chat History](#get-chat-history)
     *   [Delete All Chat Histories](#delete-all-chat-histories)
     *   [Update Chat Name](#update-chat-name)
+    *   [Generate Chat Name](#generate-chat-name)
 *   [Internal Service API Endpoints](#internal-service-api-endpoints)
     *   [Process PDF](#process-pdf)
 *   [RAG Service API Endpoints](#rag-service-api-endpoints)
     *   [Query RAG](#query-rag)
+    *   [Query with Streaming](#query-with-streaming)
 
 ## Global Error Handling
 
@@ -387,6 +389,36 @@ Updates the name of a specific chat thread.
         }
         ```
 
+### Generate Chat Name
+
+Generates an AI-based chat name from a user query using Gemini models.
+
+*   **Endpoint:** `GET /api/chat_service/generate_chat_name/{user_query}`
+*   **Path Parameter:**
+    *   `user_query` (string, required): The user’s initial input or question to be used for generating the chat name.
+*   **Headers:**
+    *   `Authorization: Bearer <your_jwt_token>`
+*   **Success Response (200 OK):**
+    ```json
+    {
+      "success": true,
+      "message": "Chat name generated successfully",
+      "data": {
+        "chat_name": "My Legal Issue"
+      },
+      "error": null
+    }
+    ```
+*   **Error Response (500 Internal Server Error):**
+    ```json
+    {
+      "success": false,
+      "message": "Chat name generation failed",
+      "data": {},
+      "error": "Gemini API error details or internal error message"
+    }
+    ```
+
 ## Internal Service API Endpoints
 
 Base path: `/api/internal`
@@ -504,5 +536,34 @@ Submits a query to the RAG service for a specific chat thread. The service retri
           "error": "" // Potentially more specific error
         }
         ```
+### Query with Streaming
+
+Streams RAG responses in real time using Server-Sent Events (SSE), sending the `chat_id` first and then chunks of the response text in groups of three words.
+
+*   **Endpoint:** `POST /api/rag/query_with_streaming`
+*   **Request Body:**
+    ```json
+    {
+      "chat_id": "string",    // ID of the chat thread
+      "user_id": "string",    // ID of the user making the query
+      "query": "string",      // The user's query
+      "web_search": false     // Optional boolean: perform a web search
+    }
+    ```
+*   **Headers:**
+    *   `Authorization: Bearer <your_jwt_token>`
+*   **Response:** `text/event-stream` with the following message sequence:
+
+    ```txt
+    data: {"chat_id": "<chat_id>"}
+
+    data: {"chunk": "First three words"}
+
+    data: {"chunk": "Next three words"}
+
+    ...
+
+    data: {"done": true}
+    ```
 
 ---

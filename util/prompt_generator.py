@@ -328,5 +328,27 @@ class PromptGenerator:
                         </prompt>"""
         return prompt
 
+    @staticmethod
+    def generate_chat_title_prompt(user_query: str) -> str:
+        prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
+                        <prompt>
+                          <instruction>
+                            Sen küçük (light) bir sohbet-başlığı ajanısın.<br/>
+                            • Aşağıdaki kullanıcı iletisini oku.<br/>
+                            • Konuyu 3-6 kelimede, Title Case olarak özetle.<br/><br/>
+                        
+                            Kurallar:<br/>
+                            1) Sadece <title> etiketi içinde döndür.<br/>
+                            2) Noktalama kullanma (gerekirse kısa tire kabul).<br/>
+                            3) Tırnak, köşeli parantez, XML ekleme.<br/>
+                            4) Mesaj boşsa <title>Genel Sohbet</title> yaz.
+                          </instruction>
+                        
+                          <userquery>
+                            {user_query}
+                          </userquery>
+                        </prompt>"""
+        return prompt
+
 
 prompt_generator = PromptGenerator()

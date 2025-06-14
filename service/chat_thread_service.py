@@ -4,11 +4,13 @@ from db.model.message_model import MessageModel
 from repository.context_repository import ContextRepository
 from util.logger import get_logger
 from util.uuid_generator import uuid_generator
+from agents.chat_name_generator_agent import chat_name_generator_agent
 
 class ChatThreadService:
     def __init__(self):
         self._logger = get_logger(__name__)
         self._context_repository = ContextRepository()
+        self._chat_name_generator_agent = chat_name_generator_agent
 
     async def create_chat_thread(
             self,
@@ -180,5 +182,20 @@ class ChatThreadService:
                        "data": {"chat": chat_thread.model_dump()}})
         return result
 
+    async def generate_chat_name(
+            self,
+            user_query: str
+    ) -> dict:
+        result: dict = {
+            "code": 0,
+            "success": False,
+            "message": "",
+            "error": "",
+            "data": {}
+        }
+        new_chat_name: str = await self._chat_name_generator_agent.generate_chat_name(user_query)
+        result.update({"code": 200, "success": True, "message": "Chat thread name generated",
+                       "data": {"new_chat_name": new_chat_name}})
+        return result
 
 chat_thread_service = ChatThreadService()

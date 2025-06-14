@@ -1,5 +1,7 @@
+import asyncio
+
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from db.model.chat_thread_model import ChatThreadModel
@@ -55,3 +57,50 @@ async def query_rag(
             error=result.get("error")
         ).model_dump()
     )
+
+@rag_router.post("/query_with_streaming", tags=["RAG Service"])
+async def query_with_streaming(
+    rag_request: RagRequestModel,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+) -> StreamingResponse:
+    logger.info(f"Streaming RAG query request for chat: {rag_request.chat_id}")
+
+    service_result: dict = await chat_thread_service.retrieve_chat_thread(rag_request.chat_id)
+    if not service_result.get("success"):
+        async def error_stream():
+            yield f"data: {{\"error\": \"{service_result.get('message', 'Chat thread retrieval failed')}\"}}\n\n"
+        return StreamingResponse(error_stream(), media_type="text/event-stream")
+
+    chat_thread = service_result.get("data")
+    if not isinstance(chat_thread, ChatThreadModel):
+        async def error_stream():
+            yield f"data: {{\"error\": \"Chat data is not valid.\"}}\n\n"
+        return StreamingResponse(error_stream(), media_type="text/event-stream")
+
+    # Run router agent
+    decision: str = await router_agent.run(chat_thread, rag_request.query)
+
+    # Run appropriate service
+    result: dict = {}
+    if decision == "rag":
+        result = await rag_service.run(query=rag_request.query, chat_thread=chat_thread, web_search=rag_request.web_search)
+    elif decision == "chat_agent":
+        result = await chat_service.run(query=rag_request.query, chat_thread=chat_thread, web_search=rag_request.web_search)
+
+    response_text: str = result.get("data", {}).get("response", "")
+
+    async def generate():
+        # Send chat_id first
+        yield f"data: {{\"chat_id\": \"{rag_request.chat_id}\"}}\n\n"
+
+        # Send response in chunks of 3 words
+        words = response_text.split()
+        for i in range(0, len(words), 3):
+            chunk = " ".join(words[i:i + 3])
+            yield f"data: {{\"chunk\": \"{chunk}\"}}\n\n"
+            await asyncio.sleep(0.1)
+
+        # Send done signal
+        yield f"data: {{\"done\": true}}\n\n"
+
+    return StreamingResponse(generate(), media_type="text/event-stream")

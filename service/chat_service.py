@@ -92,7 +92,7 @@ class ChatService:
                 contents=contents
             )
         except Exception as e:
-            result.update({"code": 503,
+            result.update({"code": 200,
                            "success": False,
                            "message": "Sistemde yaşanan bir aksaklık sebebiyle şu an size yardımcı olamıyorum.",
                            "error": str(e),
@@ -117,7 +117,7 @@ class ChatService:
                 is_updated = await self._update_chat_thread(chat_thread)
                 if is_updated:
                     result.update({
-                        "code": 503,
+                        "code": 200,
                         "success": True,
                         "message": "RAG Sorgusu başarıyla tamamlandı.",
                         "data": {"response": response.text}})

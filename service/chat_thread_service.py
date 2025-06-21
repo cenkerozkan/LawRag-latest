@@ -1,9 +1,14 @@
 import datetime
+from fastapi import File, UploadFile
+from starlette.concurrency import run_in_threadpool
 from db.model.chat_thread_model import ChatThreadModel
 from db.model.message_model import MessageModel
+from db.model.pdf_content_model import PdfContentModel
 from repository.context_repository import ContextRepository
 from util.logger import get_logger
+from util.pdf_extractor import extract_text_from_pdf_stream
 from util.uuid_generator import uuid_generator
+from config.config import EXPECTED_FILE_SIZE
 from agents.chat_name_generator_agent import chat_name_generator_agent
 
 class ChatThreadService:
@@ -11,6 +16,15 @@ class ChatThreadService:
         self._logger = get_logger(__name__)
         self._context_repository = ContextRepository()
         self._chat_name_generator_agent = chat_name_generator_agent
+
+    def _is_pdf(
+            self,
+            file: File(...),
+            mime_type: str = "application/pdf"
+    ) -> bool:
+        if mime_type != file.content_type:
+            return False
+        return True
 
     async def create_chat_thread(
             self,
@@ -197,5 +211,55 @@ class ChatThreadService:
         result.update({"code": 200, "success": True, "message": "Chat thread name generated",
                        "data": {"new_chat_name": new_chat_name}})
         return result
+
+    async def upload_file(
+            self,
+            file: UploadFile,
+            file_name: str,
+            chat_id: str
+    ) -> dict:
+        result: dict = {
+            "code": 0,
+            "success": False,
+            "message": "",
+            "error": "",
+            "data": {}
+        }
+        if not self._is_pdf(file=file):
+            self._logger.error(f"Invalid file type!")
+            result.update({"code": 400, "success": False, "message": "Only upload PDF files please"})
+            return result
+
+        file_bytes: bytes = await file.read()
+        if len(file_bytes) > EXPECTED_FILE_SIZE:
+            self._logger.error(f"File too big!")
+            result.update({"code": 400, "success": False, "message": "PDF file is too large!"})
+
+        chat_thread: ChatThreadModel = await self._context_repository.get_one_by_id(chat_id)
+        if len(chat_thread.pdf_content) == 3:
+            self._logger.error(f"Chat thread pdf upload amount exceeded!")
+            result.update({"code": 500, "success": False, "message": "Chat thread pdf upload limit exceeded. "
+                                                                     "Only 3 pdfs are allowed"})
+            return result
+
+        extract_text: dict = await run_in_threadpool(extract_text_from_pdf_stream, file_bytes)
+
+        if not extract_text.get("success"):
+            self._logger.error(f"Failed to extract text!")
+            result.update({"code": 500, "success": False, "message": "Failed to extract text",
+                           "error": extract_text.get("error")})
+            return result
+
+        new_pdf_content: PdfContentModel = PdfContentModel(file_name=file_name, file_content=extract_text.get("text"))
+        chat_thread.pdf_content.append(new_pdf_content)
+
+        is_updated: bool = await self._context_repository.update_one(chat_thread)
+        if not is_updated:
+            self._logger.error(f"Failed to update chat thread!")
+            result.update({"code": 500, "success": False, "message": "Pdf content update failed"})
+            return result
+        result.update({"code": 200, "success": True, "message": "Pdf uploaded successfully",})
+        return result
+
 
 chat_thread_service = ChatThreadService()

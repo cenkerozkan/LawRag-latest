@@ -2,7 +2,6 @@ import asyncio
 import io
 import time
 import os
-
 import aiohttp
 from starlette.concurrency import run_in_threadpool
 import pdfplumber
@@ -10,20 +9,27 @@ from PyPDF2 import PdfReader
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
 
-
 from util.logger import get_logger
 
 load_dotenv()
 logger = get_logger(__name__)
 
-"""
-    Taken from geeksforgeeks
-    https://www.geeksforgeeks.org/asynchronous-http-requests-with-python/
+# === TOKEN MANAGEMENT HELPERS ===
+MAX_WORDS = 300
+seen_hashes = set()
 
-    I made my own changes on the code since I am going to use this
-    for custom google search engine api calls.
-"""
+def truncate_content(text: str, max_words: int = MAX_WORDS) -> str:
+    words = text.split()
+    return ' '.join(words[:max_words])
 
+def is_duplicate(text: str) -> bool:
+    prefix_hash = hash(text[:200])
+    if prefix_hash in seen_hashes:
+        return True
+    seen_hashes.add(prefix_hash)
+    return False
+
+# === GOOGLE FETCH CORE ===
 
 async def fetch_data(session, url):
     async with session.get(url) as response:
@@ -34,7 +40,6 @@ async def fetch_data(session, url):
             return None
         return data
 
-
 def fetch_urls(search_data: dict) -> list:
     urls: list = []
     if 'items' in search_data:
@@ -43,14 +48,11 @@ def fetch_urls(search_data: dict) -> list:
                 urls.append(item['link'])
     return urls
 
-
 def clean_html(content: str) -> str:
     soup = BeautifulSoup(content, "html.parser")
     return soup.get_text(separator=' ', strip=True)
 
-
 async def fetch_single_page(session, url):
-    """Fetch content from a single HTML URL and clean it"""
     try:
         async with session.get(url) as response:
             if response.status == 200:
@@ -69,6 +71,16 @@ async def fetch_single_page(session, url):
                         return None
 
                 cleaned_text = await run_in_threadpool(clean_html, raw_html)
+                cleaned_text = truncate_content(cleaned_text)
+
+                if not cleaned_text or len(cleaned_text.split()) < 50:
+                    logger.info(f"Skipping short content from {url}")
+                    return None
+
+                if is_duplicate(cleaned_text):
+                    logger.info(f"Duplicate content skipped from {url}")
+                    return None
+
                 return {"page_url": url, "content": cleaned_text, "role": "Google Search"}
             else:
                 logger.error(f"Error fetching URL {url}: {response.status}")
@@ -77,45 +89,15 @@ async def fetch_single_page(session, url):
         logger.error(f"Exception fetching URL {url}: {str(e)}")
         return None
 
-
 async def fetch_page_content(list_of_urls: list) -> list:
-    """Fetch content from multiple URLs concurrently"""
     connector = aiohttp.TCPConnector(limit_per_host=20)
-    connector._max_header_field_size = 32768  # Increase header size
+    connector._max_header_field_size = 32768
 
     async with aiohttp.ClientSession(connector=connector) as session:
         tasks = [fetch_single_page(session, url) for url in list_of_urls]
         return await asyncio.gather(*tasks)
 
-
 async def google_search(search_query: str):
-    """
-       Sample response for google_search:
-       [
-           {
-               "page_url": "https://example.com/page1",
-               "content": "This is the cleaned text content from page 1...",
-               "role": "Google Search"
-           },
-           {
-               "page_url": "https://example.com/page2.pdf",
-               "content": "This is the extracted text from the PDF on page 2...",
-               "role": "Google Search"
-           },
-           {
-               "page_url": "https://anotherexample.org/article",
-               "content": "Article text cleaned and extracted...",
-               "role": "Google Search"
-           },
-           None, # Could be None if a particular URL fetch failed
-           {
-               "page_url": "https://example.com/page3",
-               "content": "More content from another page...",
-               "role": "Google Search"
-           }
-       ]
-      Or None if the initial Google Custom Search API call fails.
-   """
     key = os.getenv('GOOGLE_CUSTOM_SEARCH_API')
     cx = os.getenv('GOOGLE_CUSTOM_SEARCH_ENGINE_ID')
     base_url = f"https://www.googleapis.com/customsearch/v1?key={key}&cx={cx}&num=5"

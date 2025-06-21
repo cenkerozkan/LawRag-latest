@@ -2,10 +2,11 @@
 This file contains necessary variables and constants for the application.
 """
 
-CHUNK_SIZE = 1100
-MESSAGE_HISTORY_SIZE = 300
-GOOGLE_SEARCH_RESULT = 10
-DOC_REPO_RESULT_K=10
+CHUNK_SIZE:int = 1100
+MESSAGE_HISTORY_SIZE:int = 300
+GOOGLE_SEARCH_RESULT:int = 10
+DOC_REPO_RESULT_K:int = 10
+EXPECTED_FILE_SIZE: int = 3145728
 # This is for making document retrieval much more easy.
 # Change the lookup table to use the repository instances
 LOOKUP_TABLE: dict = {
@@ -29,4 +30,5 @@ LOOKUP_TABLE: dict = {
     "turk_anayasasi": lambda self, query, conversation_history: self._turk_anayasasi_repository.aretrieve(query, conversation_history),
     "polis_vazife_salahiyet_kanun": lambda self, query, conversation_history: self._polis_vazife_salahiyet_kanun_repository.aretrieve(query, conversation_history),
     "gumruk_kanun": lambda self, query, conversation_history: self._gumruk_kanun_repository.aretrieve(query, conversation_history),
+    "karayollari_trafik_yonetmelik": lambda self, query, conversation_history: self._karayollari_trafik_kanun_document_repository.aretriee(query, conversation_history),
 }

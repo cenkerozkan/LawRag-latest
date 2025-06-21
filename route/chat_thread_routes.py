@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from typing import Annotated
+from fastapi import APIRouter, Depends, Form, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
@@ -120,6 +121,24 @@ async def generate_chat_name(
         credentials: HTTPAuthorizationCredentials = Depends(security)
 ) -> JSONResponse:
     result: dict = await chat_thread_service.generate_chat_name(user_query)
+    return JSONResponse(
+        status_code=result.get("code"),
+        content=ResponseModel(
+            success=result.get("success"),
+            message=result.get("message"),
+            data=result.get("data"),
+            error=result.get("error")
+        ).model_dump()
+    )
+
+@chat_thread_router.post("/upload_pdf/{chat_id}", tags=["Chat Thread Service"])
+async def upload_pdf(
+        chat_id: str,
+        credentials: HTTPAuthorizationCredentials = Depends(security),
+        file: UploadFile = File(...),
+        file_name: str = Annotated[str, File()]
+) -> JSONResponse:
+    result: dict = await chat_thread_service.upload_file(file, file_name, chat_id)
     return JSONResponse(
         status_code=result.get("code"),
         content=ResponseModel(

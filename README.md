@@ -102,6 +102,7 @@ For example, to access the create chat thread endpoint:
     *   [Delete All Chat Histories](#delete-all-chat-histories)
     *   [Update Chat Name](#update-chat-name)
     *   [Generate Chat Name](#generate-chat-name)
+    *   [Upload PDF](#upload-pdf)
 *   [Internal Service API Endpoints](#internal-service-api-endpoints)
     *   [Process PDF](#process-pdf)
 *   [RAG Service API Endpoints](#rag-service-api-endpoints)
@@ -418,6 +419,76 @@ Generates an AI-based chat name from a user query using Gemini models.
       "error": "Gemini API error details or internal error message"
     }
     ```
+---
+
+### Upload PDF
+
+Uploads a PDF file and associates it with a chat thread.
+
+*   **Endpoint:** `POST /api/chat_service/upload_pdf/{chat_id}`
+*   **Path Parameter:**
+    *   `chat_id` (string, required): The ID of the chat thread to associate the PDF with.
+*   **Headers:**
+    *   `Authorization: Bearer <your_jwt_token>`
+*   **Request (multipart/form-data):**
+    *   `file`: The PDF file to upload (`application/pdf`)
+    *   `file_name`: The name of the file (string)
+
+*   **Success Response (200 OK):**
+    ```json
+    {
+      "success": true,
+      "message": "Pdf uploaded successfully",
+      "data": {},
+      "error": ""
+    }
+    ```
+*   **Error Responses:**
+    *   If the file is not a PDF:
+        ```json
+        {
+          "success": false,
+          "message": "Only upload PDF files please",
+          "data": {},
+          "error": ""
+        }
+        ```
+    *   If the PDF file is too large:
+        ```json
+        {
+          "success": false,
+          "message": "PDF file is too large!",
+          "data": {},
+          "error": ""
+        }
+        ```
+    *   If the chat thread already has 3 PDFs:
+        ```json
+        {
+          "success": false,
+          "message": "Chat thread pdf upload limit exceeded. Only 3 pdfs are allowed",
+          "data": {},
+          "error": ""
+        }
+        ```
+    *   If the PDF content cannot be extracted:
+        ```json
+        {
+          "success": false,
+          "message": "Failed to extract text",
+          "data": {},
+          "error": "Extraction error details"
+        }
+        ```
+    *   If the chat thread cannot be updated after upload:
+        ```json
+        {
+          "success": false,
+          "message": "Pdf content update failed",
+          "data": {},
+          "error": ""
+        }
+        ```
 
 ## Internal Service API Endpoints
 

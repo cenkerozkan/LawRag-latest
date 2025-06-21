@@ -35,6 +35,7 @@ from util.pdf_selector import PdfSelector
 from util.logger import get_logger
 from util.prompt_generator import prompt_generator
 from agents.web_search_agent import web_search_agent
+from agents.pdf_analyzer_agent import pdf_analyzer_agent
 from config.config import MESSAGE_HISTORY_SIZE
 from config.config import LOOKUP_TABLE
 
@@ -47,6 +48,7 @@ class RagService:
         try:
             self._gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
             self._web_search_agent = web_search_agent
+            self._pdf_analyzer_agent = pdf_analyzer_agent
             self._pdf_selector = PdfSelector()
             self._context_repository = ContextRepository()
 
@@ -162,17 +164,22 @@ class RagService:
         }
         web_search_results: list[dict[str, str]]
         web_sources: list[str] | None = None
+        pdf_analyzer_result: list[str] = []
 
         # Fetch contents (context history or message history you can say).
         contents: list = [str({"role": msg.role, "content": msg.content}) for msg in
                           chat_thread.history[-MESSAGE_HISTORY_SIZE:]]
 
+        if len(chat_thread.pdf_content) > 0:
+            pdf_analyzer_result = await pdf_analyzer_agent.analyze_pdf(chat_thread.pdf_content, contents,
+                                                                                  query)
+
         # Retrieve information from vector db repositories.
         document_content: str = await self._retrieve_document_content(query, contents)
 
         # Generate system instructions
-        prompt: str = self._prompt_generator.generate_rag_agent_prompt(rag_content=document_content, user_query=query)
-
+        prompt: str = self._prompt_generator.generate_rag_agent_prompt(rag_content=document_content, user_query=query,
+                                                                       pdf_content=pdf_analyzer_result)
 
         # If web search is asked.
         if web_search:

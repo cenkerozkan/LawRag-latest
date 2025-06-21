@@ -1,11 +1,15 @@
+from db.model.pdf_content_model import PdfContentModel
 from config.config import LOOKUP_TABLE
 
 class PromptGenerator:
     @staticmethod
     def generate_rag_agent_prompt(
             rag_content: str,
-            user_query: str
+            user_query: str,
+            pdf_content: list[str]
     ) -> str:
+        pdf_analyzer_str: str = "".join(content for content in pdf_content if pdf_content is not None) \
+                                    if pdf_content is not None else ""
         prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
                         <prompt>
                           <instruction>
@@ -27,6 +31,9 @@ class PromptGenerator:
                                   [1] https://…  (başlık opsiyonel)
                                   [2] https://…
                                 Kullanmadığın URL’leri listeleme.
+                              • Kullanıcılar PDF yüklediler ise, <pdf_analyzer_agent> kısmında 
+                                pdf analizi ajanından gelen sonuçları göreceksin. Gerekirse yanıtlarında
+                                bu içeriklere göre cevap verebilirsin. 
                     
                             ■ Eksik RAG → genel bilgi  
                               • RAG’te yalnızca madde parçası varsa ve soruyu tam yanıtlamaya yetmiyorsa,
@@ -57,6 +64,10 @@ class PromptGenerator:
                           <ragcontent>
                             {rag_content}
                           </ragcontent>
+                          
+                          <pdf_analyzer_agent>
+                            {pdf_analyzer_str}
+                          </pdf_analyzer_agent>
                     
                           <userquery>
                             {user_query}
@@ -295,7 +306,12 @@ class PromptGenerator:
         return prompt
 
     @staticmethod
-    def generate_chat_agent_prompt(user_query: str) -> str:
+    def generate_chat_agent_prompt(
+            user_query: str,
+            pdf_content: list[str]
+    ) -> str:
+        pdf_analyzer_str: str = "".join(content for content in pdf_content if pdf_content is not None) \
+            if pdf_content is not None else ""
         prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
                         <prompt>
                           <instruction>
@@ -307,6 +323,10 @@ class PromptGenerator:
                               ➜ Kullanıcının yeni iletisi ilk bakışta alakasız
                               görünse bile, önceki mesajlara GİZLİ bir atıf
                               içerebileceğini unutma; “hafızanı” kontrol et.
+                            
+                            • Kullanıcılar PDF yüklediler ise, <pdf_analyzer_agent> kısmında 
+                              pdf analizi ajanından gelen sonuçları göreceksin. Gerekirse yanıtlarında
+                              bu içeriklere göre cevap verebilirsin. 
 
                             • Yalnızca mevcut bilgi üzerinden açıklama / özet /
                               örnek ver – yeni kanun maddesi arama YOK.
@@ -321,6 +341,10 @@ class PromptGenerator:
 
                             • Çıktı düz metin olmalı, XML/HTML kullanma.
                           </instruction>
+                          
+                          <pdf_analyzer_agent>
+                            {pdf_analyzer_str}
+                          </pdf_analyzer_agent>
 
                           <userquery>
                             {user_query}
@@ -348,6 +372,49 @@ class PromptGenerator:
                             {user_query}
                           </userquery>
                         </prompt>"""
+        return prompt
+
+    @staticmethod
+    def generate_pdf_analyzer_prompt(
+            user_query: str,
+            conversation_history: list[dict],
+            pdf_content: list[PdfContentModel],
+    ) -> str:
+        pdf_to_string: str = ""
+        for i in pdf_content:
+            _: str = i.file_name + i.file_content
+            pdf_to_string += _ + "\n\n--------------"
+
+        prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
+                        <prompt>
+                            <instruction>
+                                • **ÇIKTI FORMATI ZORUNLU**  
+                                  ── Ya **sadece** birden çok  
+                                     `<selected_part>[PDF:-adı] … </selected_part>`  
+                                     etiketi (başka hiçbir tag / metin yok)  
+                                  ── **veya** tek satır `false`
+    
+                                • `<selected_part>` içinde PDF adını köşeli parantezle başa ekle.  
+                                  Ör: `<selected_part>[PDF: sozlesme.pdf] ... </selected_part>`
+    
+                                • En fazla 12 pasaj (toplam) | maks. 5 pasaj / PDF.
+    
+                                • Soruyla alakasızsan ya da hiçbir eşleşme yoksa **yalnızca** `false`.
+    
+                                • **<prompt>, <history>, <pdfs>, <userquery> blokları dışına
+                                  herhangi bir şey yazmayacaksın.**  
+                                  Yani açıklama, başlık, <answer>, vb. etiket KULLANMA.
+                            </instruction>
+                            <history>
+                                {conversation_history[-20:]}
+                            </history>
+                            <pdfs>
+                                {pdf_to_string}
+                            </pdfs>
+                            <userquery>
+                                {user_query}
+                            </userquery>
+                            """
         return prompt
 
 

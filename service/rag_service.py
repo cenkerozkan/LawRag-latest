@@ -53,28 +53,28 @@ class RagService:
             self._context_repository = ContextRepository()
 
             # Document repositories injection.
-            #self._karayollari_trafik_yonetmelik = KarayollariTrafikYonetmelikDocumentRepository(file_path="./pdf/karayollari_trafik_yonetmelik.pdf")
-            #self._hukuk_muhakemeleri_kanun_repository = HukukMuhakemeleriKanunDocumentRepository(file_path="./pdf/hukuk_muhakemeleri_kanun.pdf") # DEFAULT
-            #self._icra_ve_iflas_kanun_repository = IcraVeIflasKanunDocumentRepository(file_path="./pdf/icra_ve_iflas_kanun.pdf") # DEFAULT
-            #self._idari_yargilama_usulu_kanun_repository = IdariYargilamaUsuluKanunDocumentRepository(file_path="./pdf/idari_yargilama_usulu_kanun.pdf") # DEFAULT
-            #self._turk_anayasasi_repository = TurkAnayasasiDocumentRepository(file_path="./pdf/turk_anayasasi.pdf") # DEFAULT
-            #self._is_isci_kanun_repository = IsIsciKanunDocumentRepository(file_path="./pdf/is_isci_kanun.pdf")
-            #self._borclar_kanun_repository = BorclarKanunDocumentRepository(file_path="./pdf/borclar_kanun.pdf")
-            #self._sinai_mulkiyet_kanun_repository = SinaiMulkiyetKanunDocumentRepository(file_path="./pdf/sinai_mulkiyet_kanun.pdf")
-            #self._turk_ceza_kanun_repository = TurkCezaKanunDocumentRepository(file_path="./pdf/turk_ceza_kanun.pdf")
-            #self._rekabetin_korunmasi_kanun_repository = RekabetinKorunmasiKanunDocumentRepository(file_path="./pdf/rekabetin_korunmasi_hakkinda_kanun.pdf")
-            #self._vergi_usul_kanun_repository = VergiUsulKanunDocumentRepository(file_path="./pdf/vergi_usul_kanun.pdf")
-            #self._ceza_muhakeme_kanun_repository = CezaMuhakemeKanunDocumentRepository(file_path="./pdf/ceza_muhakeme_kanun.pdf")
-            #self._elektronik_ticaretin_duzenlenmesi_kanun_repository = ElektronikTicaretinDuzenlenmesiKanunDocumentRepository(file_path="./pdf/elektronik_ticaretin_duzenlenmesi_hakkinda_kanun.pdf")
-            #self._gelir_vergisi_kanun_repository = GelirVergisiKanunDocumentRepository(file_path="./pdf/gelir_vergisi_kanunu.pdf")
-            #self._infaz_kanun_repository = InfazKanunDocumentRepository(file_path="./pdf/infaz_kanun.pdf")
-            #self._kabahatler_kanun_repository = KabahatlerKanunDocumentRepository(file_path="./pdf/kabahatler_kanun.pdf")
-            #self._kvkk_kanun_repository = KvkkKanunDocumentRepository(file_path="./pdf/kvkk_kanun.pdf")
-            #self._medeni_kanun_repository = MedeniKanunDocumentRepository(file_path="./pdf/medeni_kanun.pdf")
-            #self._tuketicinin_korunmasi_kanun_repository = TuketicininKorunmasiKanunDocumentRepository(file_path="./pdf/tuketicinin_korunmasi_hakkinda_kanun.pdf")
-            #self._turk_ticaret_kanun_repository = TurkTicaretKanunDocumentRepository(file_path="./pdf/turk_ticaret_kanun.pdf")
-            #self._polis_vazife_salahiyet_kanun_repository = PolisVazifeSalahiyetKanunDocumentRepository(file_path="./pdf/polis_vazife_salahiyet_kanun.pdf")
-            #self._gumruk_kanun_repository = GumrukKanunDocumentRepository(file_path="./pdf/gumruk_kanun.pdf")
+            self._karayollari_trafik_yonetmelik = KarayollariTrafikYonetmelikDocumentRepository(file_path="./pdf/karayollari_trafik_yonetmelik.pdf")
+            self._hukuk_muhakemeleri_kanun_repository = HukukMuhakemeleriKanunDocumentRepository(file_path="./pdf/hukuk_muhakemeleri_kanun.pdf") # DEFAULT
+            self._icra_ve_iflas_kanun_repository = IcraVeIflasKanunDocumentRepository(file_path="./pdf/icra_ve_iflas_kanun.pdf") # DEFAULT
+            self._idari_yargilama_usulu_kanun_repository = IdariYargilamaUsuluKanunDocumentRepository(file_path="./pdf/idari_yargilama_usulu_kanun.pdf") # DEFAULT
+            self._turk_anayasasi_repository = TurkAnayasasiDocumentRepository(file_path="./pdf/turk_anayasasi.pdf") # DEFAULT
+            self._is_isci_kanun_repository = IsIsciKanunDocumentRepository(file_path="./pdf/is_isci_kanun.pdf")
+            self._borclar_kanun_repository = BorclarKanunDocumentRepository(file_path="./pdf/borclar_kanun.pdf")
+            self._sinai_mulkiyet_kanun_repository = SinaiMulkiyetKanunDocumentRepository(file_path="./pdf/sinai_mulkiyet_kanun.pdf")
+            self._turk_ceza_kanun_repository = TurkCezaKanunDocumentRepository(file_path="./pdf/turk_ceza_kanun.pdf")
+            self._rekabetin_korunmasi_kanun_repository = RekabetinKorunmasiKanunDocumentRepository(file_path="./pdf/rekabetin_korunmasi_hakkinda_kanun.pdf")
+            self._vergi_usul_kanun_repository = VergiUsulKanunDocumentRepository(file_path="./pdf/vergi_usul_kanun.pdf")
+            self._ceza_muhakeme_kanun_repository = CezaMuhakemeKanunDocumentRepository(file_path="./pdf/ceza_muhakeme_kanun.pdf")
+            self._elektronik_ticaretin_duzenlenmesi_kanun_repository = ElektronikTicaretinDuzenlenmesiKanunDocumentRepository(file_path="./pdf/elektronik_ticaretin_duzenlenmesi_hakkinda_kanun.pdf")
+            self._gelir_vergisi_kanun_repository = GelirVergisiKanunDocumentRepository(file_path="./pdf/gelir_vergisi_kanunu.pdf")
+            self._infaz_kanun_repository = InfazKanunDocumentRepository(file_path="./pdf/infaz_kanun.pdf")
+            self._kabahatler_kanun_repository = KabahatlerKanunDocumentRepository(file_path="./pdf/kabahatler_kanun.pdf")
+            self._kvkk_kanun_repository = KvkkKanunDocumentRepository(file_path="./pdf/kvkk_kanun.pdf")
+            self._medeni_kanun_repository = MedeniKanunDocumentRepository(file_path="./pdf/medeni_kanun.pdf")
+            self._tuketicinin_korunmasi_kanun_repository = TuketicininKorunmasiKanunDocumentRepository(file_path="./pdf/tuketicinin_korunmasi_hakkinda_kanun.pdf")
+            self._turk_ticaret_kanun_repository = TurkTicaretKanunDocumentRepository(file_path="./pdf/turk_ticaret_kanun.pdf")
+            self._polis_vazife_salahiyet_kanun_repository = PolisVazifeSalahiyetKanunDocumentRepository(file_path="./pdf/polis_vazife_salahiyet_kanun.pdf")
+            self._gumruk_kanun_repository = GumrukKanunDocumentRepository(file_path="./pdf/gumruk_kanun.pdf")
 
 
 

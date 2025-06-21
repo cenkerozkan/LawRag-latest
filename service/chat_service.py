@@ -6,6 +6,7 @@ from google import genai
 from google.genai.types import GenerateContentResponse
 
 from db.model.chat_thread_model import ChatThreadModel
+from db.model.pdf_content_model import PdfContentModel
 from db.model.message_model import MessageModel
 from repository.context_repository import ContextRepository
 from util.logger import get_logger
@@ -73,18 +74,17 @@ class ChatService:
         }
         web_search_results: list[dict[str, str]]
         web_sources: list[str] | None = None
-        pdf_analyzer_result: list[str] = []
+        pdf_content: list[PdfContentModel] = []
 
         # Fetch contents (context history or message history you can say).
         contents: list = [str({"role": msg.role, "content": msg.content}) for msg in
                           chat_thread.history[-MESSAGE_HISTORY_SIZE:]]
 
         if len(chat_thread.pdf_content) > 0:
-            pdf_analyzer_result: list[str] = await pdf_analyzer_agent.analyze_pdf(chat_thread.pdf_content, contents,
-                                                                                  query)
+            pdf_content = chat_thread.pdf_content
 
         # Generate system instructions
-        prompt: str = self._prompt_generator.generate_chat_agent_prompt(query, pdf_analyzer_result)
+        prompt: str = self._prompt_generator.generate_chat_agent_prompt(user_query=query, pdf_content=pdf_content)
 
         # If web search is asked.
         if web_search:

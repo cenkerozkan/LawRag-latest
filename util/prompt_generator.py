@@ -6,10 +6,12 @@ class PromptGenerator:
     def generate_rag_agent_prompt(
             rag_content: str,
             user_query: str,
-            pdf_content: list[str]
+            pdf_content: list[PdfContentModel],
     ) -> str:
-        pdf_analyzer_str: str = "".join(content for content in pdf_content if pdf_content is not None) \
-                                    if pdf_content is not None else ""
+        pdf_to_string: str = ""
+        for i in pdf_content if len(pdf_content) > 1 else pdf_content:
+            _: str = i.file_name + i.file_content
+            pdf_to_string += _ + "\n\n--------------"
         prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
                         <prompt>
                           <instruction>
@@ -34,6 +36,16 @@ class PromptGenerator:
                               • Kullanıcılar PDF yüklediler ise, <pdf_analyzer_agent> kısmında 
                                 pdf analizi ajanından gelen sonuçları göreceksin. Gerekirse yanıtlarında
                                 bu içeriklere göre cevap verebilirsin. 
+                                
+                            ■ PDF KULLANIMI  
+                              • Kullanıcı PDF yüklediyse, tam metinleri `<user_pdfs>` bloğunda;  
+                                varsa seçilmiş pasajlar `<pdf_analyzer_agent>` bloğunda bulunur.  
+                              • Soru ile doğrudan ilgili noktaları bu içeriklerden de
+                                entegre edebilirsin.  Gerekli gördüğünde  
+                                “yüklediğiniz ‘X.pdf’de …” veya “(Bkz. X.pdf)” şeklinde
+                                **dosya adına açık atıf** yaparak cevabı zenginleştir.  
+                              • PDF alıntılarına numara vermek zorunda değilsin; cümle
+                                içinde dosya adını belirtmen yeterlidir.
                     
                             ■ Eksik RAG → genel bilgi  
                               • RAG’te yalnızca madde parçası varsa ve soruyu tam yanıtlamaya yetmiyorsa,
@@ -60,14 +72,14 @@ class PromptGenerator:
                               • Her cevaptan sonra profesyonel olmadığını, bir profesyonelden danışmanlık alınması 
                                 gerektiğini belirt.
                           </instruction>
+                          
+                          <user_pdfs>
+                            {pdf_to_string}
+                          </user_pdfs>
                     
                           <ragcontent>
                             {rag_content}
                           </ragcontent>
-                          
-                          <pdf_analyzer_agent>
-                            {pdf_analyzer_str}
-                          </pdf_analyzer_agent>
                     
                           <userquery>
                             {user_query}
@@ -308,10 +320,12 @@ class PromptGenerator:
     @staticmethod
     def generate_chat_agent_prompt(
             user_query: str,
-            pdf_content: list[str]
+            pdf_content: list[PdfContentModel],
     ) -> str:
-        pdf_analyzer_str: str = "".join(content for content in pdf_content if pdf_content is not None) \
-            if pdf_content is not None else ""
+        pdf_to_string: str = ""
+        for i in pdf_content:
+            _: str = i.file_name + i.file_content
+            pdf_to_string += _ + "\n\n--------------"
         prompt = f"""<?xml version="1.0" encoding="UTF-8"?>
                         <prompt>
                           <instruction>
@@ -327,6 +341,15 @@ class PromptGenerator:
                             • Kullanıcılar PDF yüklediler ise, <pdf_analyzer_agent> kısmında 
                               pdf analizi ajanından gelen sonuçları göreceksin. Gerekirse yanıtlarında
                               bu içeriklere göre cevap verebilirsin. 
+                              
+                            • **PDF içeriği kullanımı**  
+                                – Kullanıcının yüklediği PDF’lerin tam metni `<user_pdfs>` bloğunda;  
+                                  varsa seçilmiş pasajlar `<pdf_analyzer_agent>` bloğunda bulunur.  
+                                – Gerektiğinde bu içeriklere dayanarak cevap verebilir,  
+                                  “yüklediğiniz ‘X.pdf’de …” ya da “(Bkz. X.pdf)” şeklinde
+                                  dosya adına açık atıf yapabilirsin.  
+                                – PDF alıntılarına numara vermek zorunda değilsin; cümle içinde
+                                  dosya adını belirtmen yeterlidir.
 
                             • Yalnızca mevcut bilgi üzerinden açıklama / özet /
                               örnek ver – yeni kanun maddesi arama YOK.
@@ -342,9 +365,9 @@ class PromptGenerator:
                             • Çıktı düz metin olmalı, XML/HTML kullanma.
                           </instruction>
                           
-                          <pdf_analyzer_agent>
-                            {pdf_analyzer_str}
-                          </pdf_analyzer_agent>
+                          <user_pdfs>
+                            {pdf_to_string}
+                          </user_pdfs>
 
                           <userquery>
                             {user_query}

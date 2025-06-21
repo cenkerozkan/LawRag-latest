@@ -29,6 +29,7 @@ from repository.polis_vazife_salahiyet_kanun_document_repository import PolisVaz
 from repository.karayollari_trafik_yonetmelik_document_repository import KarayollariTrafikYonetmelikDocumentRepository
 
 from db.model.chat_thread_model import ChatThreadModel
+from db.model.pdf_content_model import PdfContentModel
 from db.model.message_model import MessageModel
 from repository.context_repository import ContextRepository
 from util.pdf_selector import PdfSelector
@@ -164,22 +165,21 @@ class RagService:
         }
         web_search_results: list[dict[str, str]]
         web_sources: list[str] | None = None
-        pdf_analyzer_result: list[str] = []
+        pdf_content: list[PdfContentModel] = []
 
         # Fetch contents (context history or message history you can say).
         contents: list = [str({"role": msg.role, "content": msg.content}) for msg in
                           chat_thread.history[-MESSAGE_HISTORY_SIZE:]]
 
         if len(chat_thread.pdf_content) > 0:
-            pdf_analyzer_result = await pdf_analyzer_agent.analyze_pdf(chat_thread.pdf_content, contents,
-                                                                                  query)
+            pdf_content = chat_thread.pdf_content
 
         # Retrieve information from vector db repositories.
         document_content: str = await self._retrieve_document_content(query, contents)
 
         # Generate system instructions
         prompt: str = self._prompt_generator.generate_rag_agent_prompt(rag_content=document_content, user_query=query,
-                                                                       pdf_content=pdf_analyzer_result)
+                                                                       pdf_content=pdf_content)
 
         # If web search is asked.
         if web_search:

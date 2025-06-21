@@ -30,5 +30,5 @@ LOOKUP_TABLE: dict = {
     "turk_anayasasi": lambda self, query, conversation_history: self._turk_anayasasi_repository.aretrieve(query, conversation_history),
     "polis_vazife_salahiyet_kanun": lambda self, query, conversation_history: self._polis_vazife_salahiyet_kanun_repository.aretrieve(query, conversation_history),
     "gumruk_kanun": lambda self, query, conversation_history: self._gumruk_kanun_repository.aretrieve(query, conversation_history),
-    "karayollari_trafik_yonetmelik": lambda self, query, conversation_history: self._karayollari_trafik_kanun_document_repository.aretriee(query, conversation_history),
+    "karayollari_trafik_yonetmelik": lambda self, query, conversation_history: self._karayollari_trafik_kanun_document_repository.aretrieve(query, conversation_history),
 }

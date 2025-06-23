@@ -187,6 +187,7 @@ class ChatThreadService:
             return result
         # Update the chat_name
         chat_thread.chat_name = chat_name
+        chat_thread.updated_at = datetime.datetime.now().isoformat()
         is_updated: bool = await self._context_repository.update_one(chat_thread)
         if not is_updated:
             self._logger.error(f"Failed to update chat thread")
